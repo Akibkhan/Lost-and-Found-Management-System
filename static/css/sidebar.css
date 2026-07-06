@@ -1,0 +1,365 @@
+/* ---------------------------------------------------
+   SIDEBAR WRAPPER
+--------------------------------------------------- */
+li.p-0 {
+    width: 280px;
+}
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 250px;
+  background: var(--sidebar-bg);
+  padding-top: 80px;
+  overflow-y: auto;
+  transition: width 0.3s ease, left 0.3s ease, background 0.3s;
+  z-index: 1050;
+  box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+}
+
+.sidebar.collapsed {
+  width: 78px;
+}
+
+/* Mobile slide-in */
+.sidebar.mobile-open {
+  left: 0;
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  z-index: 1045;
+}
+
+.sidebar-overlay.show {
+  display: block;
+}
+
+/* ---------------------------------------------------
+   HEADER
+--------------------------------------------------- */
+.sidebar h6 {
+  padding: 0 18px;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+/* hide text when collapsed */
+.sidebar.collapsed h6 {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------
+   LINKS
+--------------------------------------------------- */
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  color: var(--sidebar-link);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  margin: 4px 10px;
+  transition: background 0.25s ease, color 0.25s ease, padding 0.3s ease;
+}
+
+/* icons */
+.sidebar a i {
+  font-size: 1.2rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* collapse hides text but keeps icon centered */
+.sidebar.collapsed a span {
+  display: none;
+}
+
+/* hover */
+.sidebar a:hover {
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-hover);
+}
+
+/* active link auto-detect */
+.sidebar a.active {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------
+   TOOLTIP WHEN COLLAPSED
+--------------------------------------------------- */
+.sidebar a[data-tooltip] {
+  position: relative;
+}
+
+.sidebar.collapsed a[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 78px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--tooltip-bg);
+  color: var(--tooltip-text);
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  opacity: 0;
+  animation: fadeIn 0.2s forwards;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* ---------------------------------------------------
+   DARK / LIGHT MODE COLORS
+--------------------------------------------------- */
+
+/* Light Mode */
+.light-mode {
+  --sidebar-bg: #ffffff;
+  --sidebar-link: #444;
+  --sidebar-hover-bg: rgba(0, 123, 255, 0.10);
+  --sidebar-hover: #0d6efd;
+  --sidebar-active-bg: #0d6efd;
+  --sidebar-active: #ffffff;
+
+  --tooltip-bg: #333;
+  --tooltip-text: #fff;
+}
+
+/* Dark Mode */
+.dark-mode {
+  --sidebar-bg: #121212;
+  --sidebar-link: #cfcfcf;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.10);
+  --sidebar-hover: #fff;
+  --sidebar-active-bg: #0d6efd;
+  --sidebar-active: #fff;
+
+  --tooltip-bg: #eee;
+  --tooltip-text: #111;
+}
+
+/* ---------------------------------------------------
+   SCROLLBAR DESIGN
+--------------------------------------------------- */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 10px;
+}
+
+.sidebar.dark-mode::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+}
+/* ---------------------------------------------------
+   SIDEBAR CLOSE BUTTON
+--------------------------------------------------- */
+.sidebar-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 14px;
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-link);
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: background 0.25s, color 0.25s, transform 0.25s;
+}
+
+.sidebar-close-btn i {
+  font-size: 1.1rem;
+}
+
+/* hover effect */
+.sidebar-close-btn:hover {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active);
+  transform: rotate(90deg);
+}
+
+/* collapsed sidebar (button stays visible but aligned) */
+.sidebar.collapsed .sidebar-close-btn {
+  right: 8px;
+}
+
+/* ---------------------------------------
+   NAVBAR TOGGLE BUTTON
+--------------------------------------- */
+.toggle-sidebar-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.6rem;
+  color: var(--sidebar-link);
+  cursor: pointer;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.toggle-sidebar-btn:hover {
+  transform: translateX(2px);
+  color: var(--sidebar-active);
+}
+
+/* Dark mode auto support */
+.light-mode .toggle-sidebar-btn {
+  color: #333;
+}
+
+.dark-mode .toggle-sidebar-btn {
+  color: #ddd;
+}
+/* ---------------------------------------------------
+   RESPONSIVE
+--------------------------------------------------- */
+@media (max-width: 992px) {
+  .sidebar {
+    left: -260px;
+  }
+
+  .sidebar.mobile-open {
+    left: 0;
+  }
+}
+/* Hide sidebar by default */
+.sidebar {
+    transform: translateX(-100%); /* hidden initially */
+}
+
+/* When opened (desktop + mobile) */
+.sidebar.show,
+.sidebar.mobile-open {
+    transform: translateX(0);
+}
+/* ==========================
+   Animated Hamburger → X
+   + Ripple effect
+   ========================== */
+
+.toggle-sidebar-btn {
+  --btn-size: 44px;
+  position: relative;
+  width: var(--btn-size);
+  height: var(--btn-size);
+  padding: 6px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.03);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;            /* required for ripple */
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 220ms ease, background 220ms ease;
+  z-index: 2200;
+}
+
+/* Slight press feedback */
+.toggle-sidebar-btn:active { transform: scale(0.98); }
+
+/* Hamburger structure */
+.hamburger-box {
+  width: 22px;
+  height: 16px;
+  display: inline-block;
+  position: relative;
+}
+.hamburger-inner,
+.hamburger-inner::before,
+.hamburger-inner::after {
+  width: 22px;
+  height: 2px;
+  background-color: var(--sidebar-text, #fff); /* theme-aware */
+  position: absolute;
+  left: 0;
+  border-radius: 2px;
+  transition: transform 320ms cubic-bezier(.2,.7,.2,1), opacity 220ms ease, top 220ms ease;
+  content: "";
+  display: block;
+}
+
+/* center line */
+.hamburger-inner { top: 50%; transform: translateY(-50%); }
+
+/* top & bottom lines */
+.hamburger-inner::before { content: ""; top: -7px; }
+.hamburger-inner::after  { content: ""; top: 7px; }
+
+/* When active/open: morph to X */
+.toggle-sidebar-btn.is-open .hamburger-inner {
+  background-color: transparent;
+}
+.toggle-sidebar-btn.is-open .hamburger-inner::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+.toggle-sidebar-btn.is-open .hamburger-inner::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+/* Optional: darker bg when open */
+.toggle-sidebar-btn.is-open {
+  background: rgba(0,0,0,0.06);
+}
+
+/* ==========================
+   Ripple effect
+   ========================== */
+.toggle-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 600ms linear;
+  background: rgba(0,0,0,0.12);
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Theme-aware ripple color for dark mode -- override via .dark-mode */
+.light-mode .toggle-sidebar-btn .toggle-ripple { background: rgba(0,0,0,0.12); }
+.dark-mode  .toggle-sidebar-btn .toggle-ripple { background: rgba(255,255,255,0.12); }
+
+/* Small accessibility focus outline */
+.toggle-sidebar-btn:focus {
+  outline: 3px solid rgba(79,140,255,0.18);
+  outline-offset: 2px;
+}button#sidebarToggleBtn {
+    background: transparent;
+}
+
+
