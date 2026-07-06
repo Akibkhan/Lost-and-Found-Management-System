@@ -1,1 +1,6 @@
-*.py linguist-language=Python
+dist/** linguist-generated=true
+build/** linguist-generated=true
+vendor/** linguist-vendored
+docs/** linguist-documentation
+*.min.js linguist-generated=true
+*.txt linguist-language=Python
