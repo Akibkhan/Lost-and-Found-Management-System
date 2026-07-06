@@ -291,14 +291,31 @@ flask run --debug
 - Geopy
 - NumPy
 
----
-
 # License
 
-Specify your project's license here (e.g., MIT, Apache 2.0, GPL).
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
+
+Copyright (C) 2026
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the **GNU General Public License** as published by
+the Free Software Foundation, either **version 3 of the License**, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but **WITHOUT ANY WARRANTY**; without even the implied warranty of
+**MERCHANTABILITY** or **FITNESS FOR A PARTICULAR PURPOSE**. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see:
+
+https://www.gnu.org/licenses/gpl-3.0.html
+
+A copy of the full license text is included in the `LICENSE` file located
+at the root of this repository.
 
 ---
-
 # Support
 
 If you encounter any issues or have questions, please open an issue in this repository.
