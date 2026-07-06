@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+  <h3>Claim "{{ item.name }}"</h3>
+  <form method="POST" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label>Contact Info</label>
+      <input type="text" name="contact_info" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Proof Document / Receipt</label>
+      <input type="file" name="proof_document" class="form-control">
+    </div>
+    <div class="mb-3">
+      <label>Message</label>
+      <textarea name="message" class="form-control" rows="3"></textarea>
+    </div>
+    <button class="btn btn-success w-100">Submit Claim</button>
+  </form>
+</div>
+{% endblock %}

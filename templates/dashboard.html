@@ -1,0 +1,1380 @@
+{% extends "base.html" %}
+{% block title %}Lost & Found Dashboard{% endblock %}
+
+{% block content %}
+
+
+
+
+<!-- 📢 Announcements -->
+{% if current_user.role in ['admin','moderator'] %}
+<div class="d-flex justify-content-end mb-2">
+  <button
+    class="btn btn-warning rounded-pill shadow-sm"
+    data-bs-toggle="modal"
+    data-bs-target="#createAnnouncementModal">
+    <i class="bi bi-megaphone-fill me-1"></i>
+    Add Announcement
+  </button>
+</div>
+{% endif %}
+{% if announcements %}
+<div class="mb-4">
+
+  <div class="accordion" id="announcementAccordion">
+    <div class="accordion-item border-0 shadow-sm rounded-4 announcement-wrapper">
+
+      <h2 class="accordion-header">
+        <button
+          class="accordion-button fw-semibold rounded-4 announcement-toggle"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#announcementCollapse">
+          <i class="bi bi-megaphone-fill me-2"></i> Important Announcements
+        </button>
+      </h2>
+
+      <div id="announcementCollapse" class="accordion-collapse collapse show">
+        <div class="accordion-body">
+
+          {% for announcement in announcements %}
+         <div class="announcement-card mb-3">
+  <div class="d-flex align-items-start gap-3">
+
+    <div class="announcement-icon">
+      <i class="bi bi-exclamation-circle-fill"></i>
+    </div>
+
+    <div class="flex-grow-1">
+      <h6 class="fw-semibold mb-1">
+        {{ announcement.title }}
+        {% if announcement.is_pinned %}
+          <span class="badge bg-warning text-dark ms-1">📌 Pinned</span>
+        {% endif %}
+      </h6>
+      <p class="mb-1 small">{{ announcement.message }}</p>
+    </div>
+
+    {% if current_user.role in ['admin','moderator'] %}
+    <div class="d-flex gap-2">
+
+      <!-- ✏️ EDIT BUTTON -->
+      <button
+        class="btn btn-sm btn-outline-primary edit-announcement-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#editAnnouncementModal"
+
+        data-id="{{ announcement.id }}"
+        data-title="{{ announcement.title }}"
+        data-message="{{ announcement.message }}"
+        data-pinned="{{ announcement.is_pinned }}"
+        data-expires="{{ announcement.expires_at.strftime('%Y-%m-%dT%H:%M') if announcement.expires_at }}"
+      >
+        <i class="bi bi-pencil"></i>
+      </button>
+
+      <!-- 🗑 DELETE -->
+      <a href="{{ url_for('delete_announcement', id=announcement.id) }}"
+         class="btn btn-sm btn-outline-danger">
+        <i class="bi bi-trash"></i>
+      </a>
+
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+          {% endfor %}
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endif %}
+
+<!-- 🔧 Services Accordion -->
+{% if current_user.role in ['admin', 'moderator'] %}
+<div class="mb-5">
+
+  <div class="accordion" id="servicesAccordion">
+    <div class="accordion-item border-0 shadow-sm rounded-4">
+      <h2 class="accordion-header">
+       <button
+    class="accordion-button collapsed fw-semibold rounded-4 services-toggle {% if current_user.role == 'admin' %}admin-btn{% elif current_user.role == 'moderator' %}mod-btn{% else %}{% endif %}"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#servicesCollapse"
+>
+    <i class="bi bi-grid-fill me-2"></i>
+    {% if current_user.role == 'admin' %}
+        Admin Services
+    {% elif current_user.role == 'moderator' %}
+        Moderator Services
+    {% else %}
+        
+    {% endif %}
+</button>
+      </h2>
+
+      <div id="servicesCollapse" class="accordion-collapse collapse">
+        <div class="accordion-body pt-4">
+
+          <div class="row g-4">
+
+            <!-- Manage Users -->
+            <div class="col-md-4 col-lg-3">
+              <a href="{{ url_for('manage_users') }}" class="service-card">
+                <i class="bi bi-people-fill"></i>
+                <span>Manage Users</span>
+              </a>
+            </div>
+
+            <!-- Manage Comments -->
+            <div class="col-md-4 col-lg-3">
+              <a href="{{ url_for('pending_comments') }}" class="service-card">
+                <i class="bi bi-chat-square-dots-fill"></i>
+                <span>Manage Comments</span>
+              </a>
+            </div>
+<!-- Manage Categories -->
+<div class="col-md-4 col-lg-3">
+  <a href="{{ url_for('categories') }}" class="service-card">
+    <i class="bi bi-tags-fill"></i>
+    <span>Manage Categories</span>
+  </a>
+</div>
+            <!-- Manage Claims -->
+            <div class="col-md-4 col-lg-3">
+              <a href="{{ url_for('all_claims') }}" class="service-card">
+                <i class="bi bi-shield-check"></i>
+                <span>Manage Claims</span>
+              </a>
+            </div>
+
+            <!-- Notifications -->
+            <div class="col-md-4 col-lg-3">
+              <a href="{{ url_for('all_notifications') }}" class="service-card">
+                <i class="bi bi-bell-fill"></i>
+                <span>Notifications</span>
+              </a>
+            </div>
+
+            <!-- Mail -->
+            <div class="col-md-4 col-lg-3">
+              <a href="{{ url_for('mail.list_mails',folder='inbox') }}" class="service-card">
+                <i class="bi bi-envelope-fill"></i>
+                <span>Mail</span>
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endif %}
+{% if current_user.role == 'user' %}
+<div class="accordion my-3">
+  <button
+      class="accordion-button collapsed fw-semibold rounded-4 services-toggle user-btn"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#userServicesCollapse"
+  >
+      <i class="bi bi-grid-fill me-2"></i> User Services
+  </button>
+
+  <div id="userServicesCollapse" class="accordion-collapse collapse">
+    <div class="accordion-body">
+      <div class="row g-3">
+        <div class="col-md-4 col-lg-3">
+          <a href="{{ url_for('add_item') }}" class="service-card">
+            <i class="bi bi-plus-circle-fill"></i> <span>Add a Lost or Found Item</span>
+          </a>
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <a href="{{ url_for('profile') }}" class="service-card">
+            <i class="bi bi-person-fill"></i> <span>Profile</span>
+          </a>
+        </div>
+        <div class="col-md-4 col-lg-3">
+         <a href="{{ url_for('mail.list_mails',folder='inbox') }}" class="service-card">
+            <i class="bi bi-envelope-fill"></i> <span>Mail</span>
+          </a>
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <a href="{{ url_for('search_page') }}" class="service-card">
+            <i class="bi bi-search"></i> <span>Search</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+ 
+<!-- Admin/Moderator Tools -->
+{% if current_user.role in ['admin', 'moderator'] %}
+<div class="d-flex align-items-center mb-4">
+  <a href="{{ url_for('all_claims') }}" class="btn btn-outline-primary me-2">
+    <i class="bi bi-shield-check me-1"></i> Manage Claims
+  </a>
+  <a href="{{ url_for('pending_comments') }}" class="btn btn-outline-secondary">
+    <i class="bi bi-chat-square-text me-1"></i> Moderate Comments
+  </a>
+</div>
+{% endif %}
+
+
+
+
+
+{% if items and items|length > 0 %}
+
+<!-- Title -->
+<h2 class="fw-bold mb-4 text-gradient">Lost & Found Feed</h2>
+
+<!-- Loading Animation -->
+<div id="feedLoader" class="row g-4">
+  {% for _ in range(3) %}
+  <div class="col-md-4">
+    <div class="card loading shimmer">
+      <div class="card-body">
+        <div class="placeholder-wave mb-3" style="height: 180px; border-radius: 12px;"></div>
+        <div class="placeholder col-6 mb-2"></div>
+        <div class="placeholder col-8 mb-2"></div>
+        <div class="placeholder col-4 mb-2"></div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Feed Carousel -->
+<div class="owl-carousel owl-theme d-none" id="feedCarousel">
+  {% for item in items %}
+
+  <div class="item">
+
+    <div class="card feed-card shadow-sm bg-body-tertiary">
+	   	    <a href="/item/{{item.id}}"> 
+      {% if item.photo %}
+      <img src="{{ url_for('static', filename='uploads/' ~ item.photo) }}" class="card-img-top" alt="{{ item.name }}"  style="    width: 100%;
+    height: 300px;
+      object-fit: contain;
+
+    border-radius: 0;">
+      {% else %}
+      <img src="{{ url_for('static', filename='default-placeholder.png') }}" class="card-img-top" alt="No image">
+      {% endif %}
+</a>
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="card-title fw-semibold">{{ item.name }}</h5>
+          <span class="badge bg-info text-dark">{{ item.status|capitalize }}</span>
+        </div>
+
+        <!-- Category -->
+        {% if item.category %}
+        <p class="mb-2">
+          <span class="badge bg-gradient bg-primary">
+            <i class="bi bi-tag-fill"></i> {{ item.category.name }}
+          </span>
+        </p>
+        {% endif %}
+
+        <p class="card-text text-muted small">{{ item.description|truncate(150) }}</p>
+        <p class="mb-1">
+  <i class="bi bi-geo-alt"></i> 
+  <strong>Location:</strong> 
+  <span class="location-text" 
+        data-lat="{{ item.latitude }}" 
+        data-lon="{{ item.longitude }}">
+        Loading...
+  </span>
+</p>
+        <p class="mb-1"><i class="bi bi-calendar"></i> <strong>Date:</strong> {{ item.date_reported.strftime('%Y-%m-%d') if item.date_reported else 'N/A' }}</p>
+        <p class="mb-2"><i class="bi bi-person"></i> <strong>Posted by:</strong> <a href='/user/{{item.user.id}}'>{{ item.user.first_name + ' '+ item.user.last_name }}</a></p>
+
+      <!-- Comments (Threaded) -->
+<details class="mb-3">
+  <summary class="fw-semibold text-primary"><i class="bi bi-chat-dots me-1"></i> Comments</summary>
+  <div class="mt-3" id="comments-section-{{ item.id }}">
+
+    {% macro render_comments(comments) %}
+    <div class="comments-list">
+      {% for comment in comments %}
+      <div class="comment-box d-flex flex-column mb-2 p-2 border rounded" id="comment-{{ comment.id }}">
+        <div class="d-flex align-items-start gap-2">
+          <!-- Avatar -->
+          <img src="{% if comment.user and comment.user.profile_picture %}
+                        {{ url_for('static', filename='profile_pics/' ~ comment.user.profile_picture) }}
+                      {% else %}
+                        {{ url_for('static', filename='default-avatar.png') }}
+                      {% endif %}"
+               class="comment-avatar" alt="{{ comment.user.username if comment.user else 'User' }}">
+
+          <!-- Comment content -->
+          <div class="comment-body flex-grow-1">
+            <div class="comment-header d-flex justify-content-between align-items-center">
+              <span class="comment-username">{{ comment.user.username if comment.user else 'Unknown' }}</span>
+              <span class="comment-meta">{{ comment.timestamp|format_datetime }}</span>
+            </div>
+            <div class="comment-text">{{ comment.content }}</div>
+
+            <!-- Actions: reply/like/moderation -->
+            <div class="comment-actions mt-1">
+              {% if comment.status == 'pending' and comment.user_id == current_user.id %}
+                <span class="badge bg-warning text-dark">Pending</span>
+              {% elif current_user.role in ['admin', 'moderator'] %}
+                <span class="badge bg-secondary">{{ comment.status|capitalize }}</span>
+                {% if comment.status == 'pending' %}
+                  <div class="d-flex gap-2 mt-1">
+                    <a href="{{ url_for('approve_comment', comment_id=comment.id) }}" class="btn btn-sm btn-success">Approve</a>
+                    <a href="{{ url_for('reject_comment', comment_id=comment.id) }}" class="btn btn-sm btn-danger">Reject</a>
+                  </div>
+                {% endif %}
+              {% endif %}
+            </div>
+
+            <!-- Reply toggle -->
+            <button class="btn btn-sm btn-link text-decoration-none text-primary fw-semibold mt-1"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#replies-{{ comment.id }}">
+              💬 Reply
+              {% if comment.replies|length %}
+                <span class="badge bg-primary rounded-pill">{{ comment.replies|length }}</span>
+              {% endif %}
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Nested replies -->
+        <div class="collapse ps-4 mt-2" id="replies-{{ comment.id }}">
+          {% if comment.replies %}
+            {{ render_comments(comment.replies) }}
+          {% endif %}
+
+          <!-- Reply form -->
+          <div class="mt-2">
+         <form method="POST" action="{{ url_for('add_comment', item_id=item.id) }}" class="mt-2">
+  <input type="hidden" name="parent_id" value="{{ comment.id }}">
+  <input type="text" name="content" class="form-control form-control-sm" placeholder="Write a reply..." required>
+  <button type="submit" class="btn btn-sm btn-primary">Reply</button>
+</form>
+
+          </div>
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+    {% endmacro %}
+
+    {% set top_level_comments = item.filtered_comments|selectattr("parent_id", "equalto", None)|list %}
+    {% if top_level_comments %}
+      {{ render_comments(top_level_comments) }}
+    {% else %}
+      <p class="text-muted mt-2">No comments yet.</p>
+    {% endif %}
+
+  </div>
+
+  <!-- Add top-level comment -->
+  <form method="POST" action="{{ url_for('add_comment', item_id=item.id) }}" class="mt-2 comment-input-group">
+  <input type="text" name="content" class="form-control" placeholder="Write a comment..." required>
+  <button type="submit" class="btn btn-primary">
+    <i class="bi bi-send-fill"></i>
+  </button>
+</form>
+
+
+</details>
+
+
+
+
+        <!-- Claim Button -->
+        {% if item.status != 'claimed' %}
+        <button 
+          class="btn btn-success btn-sm w-100 mt-2" 
+          data-bs-toggle="modal" 
+          data-bs-target="#claimModal{{ item.id }}">
+          <i class="bi bi-hand-index-thumb"></i> Claim Item
+        </button>
+        {% endif %}
+		<br><br>
+		{% if current_user.role=="admin" or current_user.id == item.user_id %}
+<div class="dropdown text-end">
+    <button class="btn btn-sm btn-light border-0" type="button" data-bs-toggle="dropdown">
+        <i class="bi bi-three-dots-vertical"></i>
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+            <a class="dropdown-item" href="{{ url_for('edit_item', item_id=item.id) }}">
+                <i class="bi bi-pencil-square me-2"></i> Edit
+            </a>
+        </li>
+		<li><form action="{{ url_for('delete_item', item_id=item.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');">
+    <button type="submit" class="btn bi bi-trash">
+        Delete
+    </button>
+</form></li>
+    </ul>
+</div>
+{% endif %}
+
+      </div>
+    </div>
+
+  </div>
+  {% else %}
+  <p class="text-muted">No items found.</p>
+  {% endfor %}
+ 
+</div>
+{% endif %}
+<!-- ✅ Claim Modals moved outside carousel -->
+{% for item in items %}
+  {% if item.status != 'claimed' %}
+  <div class="modal fade" id="claimModal{{ item.id }}" tabindex="-1" aria-labelledby="claimModalLabel{{ item.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form method="POST" action="{{ url_for('claim_item', item_id=item.id) }}" enctype="multipart/form-data">
+          <div class="modal-header">
+            <h5 class="modal-title" id="claimModalLabel{{ item.id }}">Claim: {{ item.name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Contact Info</label>
+              <input type="text" name="contact_info" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Upload Document</label>
+              <input type="file" name="documents" class="form-control" multiple>
+
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Submit</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+{% endfor %}
+
+<!-- Styles -->
+<style>
+  .text-gradient {
+    background: linear-gradient(90deg, #0062cc, #00bcd4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+ /* Let Bootstrap utility classes control background */
+.feed-card {
+  border-radius: 15px;
+  overflow: hidden;
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Only apply background IF no bg-* class is present */
+.feed-card:not([class*="bg-"]) {
+  background-color: var(--bs-body-bg);
+}
+
+/* Hover */
+.feed-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Improve shadow in dark mode */
+[data-bs-theme="dark"] .feed-card.shadow-sm,
+body.dark-mode .feed-card.shadow-sm {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6) !important;
+}
+.feed-card img {
+  object-fit: cover;
+  height: 200px;
+}
+
+
+  .badge.bg-gradient {
+    background: linear-gradient(90deg, #007bff, #00bcd4);
+    color: white;
+    font-weight: 500;
+    border-radius: 10px;
+    padding: 5px 10px;
+  }
+
+  .modal-content {
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+  }
+
+  .modal-backdrop.show {
+    opacity: 0.6;
+    backdrop-filter: blur(4px);
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150px;
+    width: 150px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 1.2s infinite;
+  }
+
+  @keyframes shimmer {
+    100% { transform: translateX(300%); }
+  }
+
+  /* 🌙 Dark mode */
+  body.dark-mode .feed-card {
+    background-color: #1e1e2f;
+    color: #eaeaea;
+    border: 1px solid #333;
+  }
+
+  body.dark-mode .modal-content {
+    background-color: #252539;
+    color: #eaeaea;
+  }
+</style>
+<style>
+ 
+/* Emoji button */
+.send-btn {
+  border-radius: 10px;
+}
+
+/* Modern social media comment */
+.comment-box {
+  display: flex;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid #e2e2e2;
+  margin-bottom: 12px;
+  background-color: var(--bs-light);
+  transition: background 0.2s, box-shadow 0.2s;
+  flex-wrap: wrap; /* Allows wrapping on small screens */
+}
+
+.comment-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.comment-body {
+  flex: 1 1 auto; /* Grow and shrink as needed */
+  min-width: 0;   /* Needed for text ellipsis in flexbox */
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* Wrap username and timestamp if needed */
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.comment-username {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #111;
+  white-space: nowrap;
+}
+
+.comment-meta {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.comment-text {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 6px;
+  word-break: break-word; /* Prevent overflow */
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #555;
+  flex-wrap: wrap;
+}
+
+/* Hover & Dark mode */
+.comment-box:hover {
+  background-color: var(--bs-gray-100);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+body.dark-mode .comment-box {
+  background-color: #1e1e2f;
+  border-color: #444;
+}
+
+body.dark-mode .comment-box:hover {
+  background-color: #2b2b3b;
+}
+
+body.dark-mode .comment-username, 
+body.dark-mode .comment-text {
+  color: #eaeaea;
+}
+
+body.dark-mode .comment-meta, 
+body.dark-mode .comment-actions {
+  color: #aaa;
+}
+
+
+ .comment-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.comment-input-group input {
+  flex-grow: 1;
+  border-radius: 25px;
+  padding: 8px 16px;
+}
+
+.comment-input-group button {
+  border-radius: 25px;
+  padding: 8px 16px;
+}
+
+</style>
+<style>/* Always inherit correct text color */
+.card-body {
+  color: var(--bs-body-color);
+}
+
+/* Fix when using bg-body-tertiary or similar */
+.card.bg-body-tertiary .card-body {
+  background-color: transparent; /* let parent show */
+}
+
+/* If NO bg utility is used → apply theme-aware background */
+.card:not([class*="bg-"]) .card-body {
+  background-color: var(--bs-body-bg);
+}
+
+/* 🔥 Dark mode override (stronger selector) */
+[data-bs-theme="dark"] .card:not([class*="bg-"]) .card-body,
+body.dark-mode .card:not([class*="bg-"]) .card-body {
+  background-color: #232334;
+}
+
+/* Optional: better separation */
+.card-body {
+  border-top: 1px solid var(--bs-border-color);
+}
+/* Ensure card + body inherit correct theme inside owl */
+.owl-carousel .card,
+.owl-carousel .card-body {
+  color: var(--bs-body-color);
+}
+
+/* If using bg-body-tertiary → let it show */
+.owl-carousel .card.bg-body-tertiary .card-body {
+  background-color: transparent;
+}
+
+/* If NO bg class → apply theme-aware background */
+.owl-carousel .card:not([class*="bg-"]) .card-body {
+  background-color: var(--bs-body-bg);
+}
+
+/* 🔥 Dark mode (important for owl override) */
+[data-bs-theme="dark"] .owl-carousel .card:not([class*="bg-"]) .card-body,
+body.dark-mode .owl-carousel .card:not([class*="bg-"]) .card-body {
+  background-color: #232334;
+  color: #eaeaea;
+}
+
+/* Remove owl forced backgrounds */
+.owl-theme .owl-item {
+  background: transparent !important;
+}
+
+/* Ensure cards control their own look */
+.owl-carousel .feed-card {
+  background-color: var(--bs-body-bg);
+}
+
+/* Dark mode */
+[data-bs-theme="dark"] .owl-carousel .feed-card,
+body.dark-mode .owl-carousel .feed-card {
+  background-color: #1e1e2f;
+}
+[data-bs-theme="dark"] .owl-carousel .shadow-sm,
+body.dark-mode .owl-carousel .shadow-sm {
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6) !important;
+}/* Default Bootstrap behavior (keep it) */
+.text-muted {
+  color: var(--bs-secondary-color) !important;
+}
+
+/* Dark mode override */
+[data-bs-theme="dark"] .text-muted,
+body.dark-mode .text-muted {
+  color: rgba(255, 255, 255, 0.75) !important;
+}/* Let Bootstrap control background in light mode */
+.owl-carousel .card.bg-body-tertiary .card-body {
+  background-color: transparent;
+  color: var(--bs-body-color);
+}
+
+/* Dark mode enhancement */
+[data-bs-theme="dark"] .owl-carousel .card.bg-body-tertiary .card-body,
+body.dark-mode .owl-carousel .card.bg-body-tertiary .card-body {
+  background-color: #181825; /* softer than pure black */
+  color: #eaeaea;
+}/* Keep default Bootstrap in light mode */
+.btn-light {
+  background-color: var(--bs-light);
+  color: var(--bs-dark);
+}
+
+/* Dark mode override */
+[data-bs-theme="dark"] .btn-light,
+body.dark-mode .btn-light {
+  background-color: #2b2b3b;
+  color: #eaeaea;
+  border: 1px solid #444; /* restore subtle border */
+}
+
+/* Hover state */
+[data-bs-theme="dark"] .btn-light:hover,
+body.dark-mode .btn-light:hover {
+  background-color: #3a3a4f;
+  color: #fff;
+}</style>
+<!-- OwlCarousel2 CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+
+<!-- JS -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+ 
+
+<script>
+$(document).ready(function() {
+  // Simulate loading
+  setTimeout(function() {
+    $("#feedLoader").addClass("d-none");
+    $("#feedCarousel").removeClass("d-none");
+
+    $(".owl-carousel").owlCarousel({
+      loop: true,
+      margin: 20,
+      nav: true,
+      dots: false,
+      autoplay: true,
+      autoplayTimeout: 4000,
+      smartSpeed: 800,
+      navText: [
+        "<i class='bi bi-arrow-left-circle-fill fs-3'></i>",
+        "<i class='bi bi-arrow-right-circle-fill fs-3'></i>"
+      ],
+      responsive: {
+        0: { items: 1 },
+        768: { items: 2 },
+        1200: { items: 3 }
+      }
+    });
+  }, 1000); // Delay in ms
+});
+</script>
+
+<style>
+/* ------------------ Feed Cards ------------------ */
+.feed-card {
+  border-radius: 15px;
+  overflow: hidden;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feed-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Dark mode */
+[data-bs-theme="dark"] .feed-card,
+body.dark-mode .feed-card {
+  background-color: #1e1e2f;
+  color: #eaeaea;
+  border-color: #333;
+}
+
+/* ------------------ Carousel Images ------------------ */
+#feedCarousel .owl-item img {
+ width: 15%;
+    height: 50px;
+    object-fit: contain;
+    border-radius: 15px;
+}
+
+/* ------------------ Badges ------------------ */
+.badge.bg-gradient {
+  background: linear-gradient(90deg, #007bff, #00bcd4);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 10px;
+  padding: 5px 10px;
+}
+
+/* Slight tweak for dark mode contrast */
+[data-bs-theme="dark"] .badge.bg-gradient,
+body.dark-mode .badge.bg-gradient {
+  filter: brightness(1.1);
+}
+
+/* ------------------ Modals ------------------ */
+.modal-content {
+  border-radius: 1rem;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+}
+
+/* Dark mode modal */
+[data-bs-theme="dark"] .modal-content,
+body.dark-mode .modal-content {
+  background-color: #252539;
+  color: #eaeaea;
+}
+
+/* Backdrop */
+.modal-backdrop.show {
+  opacity: 0.6;
+  backdrop-filter: blur(4px);
+}
+
+/* ------------------ Shimmer Loader ------------------ */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bs-secondary-bg);
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150px;
+  width: 150px;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.3),
+    transparent
+  );
+  animation: shimmer 1.2s infinite;
+}
+
+/* Dark mode shimmer */
+[data-bs-theme="dark"] .shimmer,
+body.dark-mode .shimmer {
+  background-color: #2b2b3b;
+}
+
+[data-bs-theme="dark"] .shimmer::after,
+body.dark-mode .shimmer::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.15),
+    transparent
+  );
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(300%); }
+}
+/* ------------------ Services Accordion ------------------ */
+.services-toggle {
+  color: #fff;
+  border-radius: 16px !important;
+}
+
+/* Role-specific backgrounds */
+.services-toggle.admin-btn {
+  background: linear-gradient(90deg, #0062cc, #00bcd4);
+}
+
+.services-toggle.mod-btn {
+  background: linear-gradient(90deg, #ffc76f, #e35f43);
+}
+
+.services-toggle.user-btn {
+  background: linear-gradient(90deg, #04e4c5, #18c43c);
+}
+
+.services-toggle:not(.collapsed) {
+  color: #fff;
+}
+
+/* ------------------ Service Cards ------------------ */
+.service-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 25px;
+  height: 140px;
+  border-radius: 20px;
+  background: var(--bs-body-bg);
+  text-decoration: none;
+  color: var(--bs-body-color);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+
+.service-card i {
+  font-size: 2rem;
+  color: var(--bs-primary);
+}
+
+.service-card span {
+  font-weight: 600;
+}
+
+.service-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  background: linear-gradient(135deg, #0062cc, #00bcd4);
+  color: #fff;
+}
+
+.service-card:hover i {
+  color: #fff;
+}
+
+/* Dark mode support (Bootstrap + custom) */
+[data-bs-theme="dark"] .service-card,
+body.dark-mode .service-card {
+  background: #0095d0;
+  color: #eaeaea;
+}
+[data-bs-theme="dark"] .service-card i,
+body.dark-mode .service-card i {
+  color: #eaeaea;
+}
+[data-bs-theme="dark"] .service-card:hover,
+body.dark-mode .service-card:hover {
+  background: linear-gradient(135deg, #0056b3, #00acc1);
+}
+
+/* ------------------ Comments ------------------ */
+.comment-box {
+  display: flex;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--bs-border-color);
+  margin-bottom: 12px;
+  background-color: var(--bs-light);
+  transition: background 0.2s, box-shadow 0.2s;
+  flex-wrap: wrap;
+}
+
+.comment-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.comment-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.comment-username {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--bs-body-color);
+  white-space: nowrap;
+}
+
+.comment-meta {
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+}
+
+.comment-text {
+  font-size: 0.9rem;
+  color: var(--bs-body-color);
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color);
+  flex-wrap: wrap;
+}
+
+/* Nested comments */
+.comment-box .comment-box {
+  margin-left: 60px;
+  background-color: var(--bs-tertiary-bg);
+  border-color: var(--bs-border-color);
+}
+
+/* Dark mode (Bootstrap + custom) */
+[data-bs-theme="dark"] .comment-box,
+body.dark-mode .comment-box {
+  background-color: #1e1e2f;
+  border-color: #444;
+}
+
+[data-bs-theme="dark"] .comment-box:hover,
+body.dark-mode .comment-box:hover {
+  background-color: #2b2b3b;
+}
+
+[data-bs-theme="dark"] .comment-username,
+[data-bs-theme="dark"] .comment-text,
+body.dark-mode .comment-username,
+body.dark-mode .comment-text {
+  color: #eaeaea;
+}
+
+[data-bs-theme="dark"] .comment-meta,
+[data-bs-theme="dark"] .comment-actions,
+body.dark-mode .comment-meta,
+body.dark-mode .comment-actions {
+  color: #aaa;
+}
+
+/* Hover */
+.comment-box:hover {
+  background-color: var(--bs-gray-100);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+/* ------------------ Comment Input ------------------ */
+.comment-input-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.comment-input-group input {
+  flex-grow: 1;
+  border-radius: 25px;
+  padding: 8px 16px;
+}
+
+.comment-input-group button {
+  border-radius: 25px;
+  padding: 8px 16px;
+}
+
+
+/* ------------------ Accordion Base Fix ------------------ */
+.accordion-item {
+  background-color: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.accordion-button {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary-text-emphasis);
+}
+
+/* Fix arrow icon visibility */
+.accordion-button::after {
+  filter: none;
+}
+
+/* ------------------ Dark Mode Support ------------------ */
+[data-bs-theme="dark"] .accordion-item,
+body.dark-mode .accordion-item {
+  background-color: #1e1e2f;
+  border-color: #444;
+}
+
+[data-bs-theme="dark"] .accordion-button,
+body.dark-mode .accordion-button {
+  background-color: #1e1e2f;
+  color: #eaeaea;
+}
+
+[data-bs-theme="dark"] .accordion-button:not(.collapsed),
+body.dark-mode .accordion-button:not(.collapsed) {
+  background-color: #2b2b3b;
+  color: #fff;
+}
+
+/* Arrow icon in dark mode */
+[data-bs-theme="dark"] .accordion-button::after,
+body.dark-mode .accordion-button::after {
+  filter: invert(1) brightness(1.8);
+}
+
+/* Accordion body */
+.accordion-body {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .accordion-body,
+body.dark-mode .accordion-body {
+  background-color: #1e1e2f;
+  color: #ddd;
+}/* Keep gradient but improve contrast in dark mode */
+[data-bs-theme="dark"] .services-toggle,
+body.dark-mode .services-toggle {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+</style>
+
+
+<div class="modal fade" id="editAnnouncementModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+
+      <form id="editAnnouncementForm" method="POST">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Announcement</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input id="editTitle"
+                   name="title"
+                   class="form-control"
+                   required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea id="editMessage"
+                      name="message"
+                      class="form-control"
+                      rows="4"
+                      required></textarea>
+          </div>
+
+          <div class="form-check mb-3">
+            <input id="editPinned"
+                   class="form-check-input"
+                   type="checkbox"
+                   name="is_pinned">
+            <label class="form-check-label">📌 Pinned</label>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Expires At</label>
+            <input id="editExpires"
+                   type="datetime-local"
+                   name="expires_at"
+                   class="form-control">
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary">Save Changes</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="createAnnouncementModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+
+      <form method="POST" action="{{ url_for('create_announcement') }}">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Create Announcement</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input name="title"
+                   class="form-control"
+                   required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea name="message"
+                      class="form-control"
+                      rows="4"
+                      required></textarea>
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input"
+                   type="checkbox"
+                   name="is_pinned">
+            <label class="form-check-label">📌 Pin announcement</label>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Expires At (optional)</label>
+            <input type="datetime-local"
+                   name="expires_at"
+                   class="form-control">
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-warning">Publish</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+ 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  document.querySelectorAll(".edit-announcement-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+
+      const id = this.dataset.id;
+      const title = this.dataset.title;
+      const message = this.dataset.message;
+      const pinned = this.dataset.pinned === "True";
+      const expires = this.dataset.expires || "";
+
+      // Fill modal fields
+      document.getElementById("editTitle").value = title;
+      document.getElementById("editMessage").value = message;
+      document.getElementById("editPinned").checked = pinned;
+      document.getElementById("editExpires").value = expires;
+
+      // Update form action dynamically
+      document.getElementById("editAnnouncementForm").action =
+        `/announcements/${id}/edit`;
+    });
+  });
+
+});
+</script>
+<script>
+// ================= MULTI ITEM LOCATION FETCH =================
+async function fetchAllAddresses() {
+    const elements = document.querySelectorAll('.location-text');
+
+    for (const el of elements) {
+        const lat = el.dataset.lat;
+        const lon = el.dataset.lon;
+
+        if (!lat || !lon || lat === "None" || lon === "None") {
+            el.innerText = "Unknown";
+            continue;
+        }
+
+        try {
+            const res = await fetch('/get_address', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    latitude: parseFloat(lat),
+                    longitude: parseFloat(lon)
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.address) {
+                // Optional: shorten address
+                el.innerText = data.address.split(',').slice(0, 3).join(',');
+            } else {
+                el.innerText = "Not found";
+            }
+
+        } catch (err) {
+            console.error(err);
+            el.innerText = "Error";
+        }
+    }
+}
+
+// Run after page loads
+document.addEventListener('DOMContentLoaded', fetchAllAddresses);
+</script>
+ 
+
+{% endblock %}

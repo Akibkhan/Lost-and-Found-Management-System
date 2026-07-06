@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Leaflet Required -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+<script defer src="{{ url_for('static', filename='js/search.js') }}"></script>
+
+<div class="container-fluid py-4">
+
+  <!-- STICKY SEARCH BAR -->
+  <div class="search-bar sticky-top shadow-sm mb-4 p-3 rounded bg-white">
+    <div class="row g-2 align-items-center">
+
+      <!-- Query -->
+      <div class="col-md-4">
+        <input type="text" id="query" class="form-control"
+               placeholder="Search items..." />
+      </div>
+
+      <!-- Category -->
+      <div class="col-md-3">
+        <select id="category" class="form-select">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat.id }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Radius -->
+      <div class="col-md-2">
+        <input type="number" id="radius" class="form-control"
+               min="1" max="100" value="5"
+               placeholder="Radius (km)">
+      </div>
+
+      <!-- Buttons -->
+      <div class="col-md-3 d-flex gap-2">
+        <button id="search-btn" class="btn btn-primary w-50">
+          <i class="bi bi-search"></i> Search
+        </button>
+        <button id="clear-btn" class="btn btn-outline-secondary w-50">
+          <i class="bi bi-x-circle"></i> Clear
+        </button>
+      </div>
+
+      <!-- REQUIRED Hidden Location Fields -->
+      <input type="hidden" id="lat">
+      <input type="hidden" id="lon">
+
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map" class="map-card mb-4 rounded shadow-sm"></div>
+
+  <!-- RESULTS -->
+  <div id="results-container" class="row g-3 masonry-grid"></div>
+
+  <!-- SKELETON TEMPLATE -->
+  <template id="skeleton-template">
+    <div class="col-md-4 item-card">
+      <div class="card skeleton-card shadow-sm">
+        <div class="skeleton-img"></div>
+        <div class="card-body">
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
+          <div class="skeleton-line long"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- PAGINATION -->
+  <div id="pagination" class="d-flex justify-content-center mt-4"></div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const params = new URLSearchParams(window.location.search);
+
+    const queryInput = document.getElementById("query");
+    const categorySelect = document.getElementById("category");
+    const radiusInput = document.getElementById("radius");
+    const latField = document.getElementById("lat");
+    const lonField = document.getElementById("lon");
+
+    // Autofill fields
+    if (params.get("query")) {
+        queryInput.value = params.get("query");
+    }
+
+    if (params.get("category")) {
+        categorySelect.value = params.get("category");
+    }
+
+    if (params.get("radius")) {
+        radiusInput.value = params.get("radius");
+    }
+
+    if (params.get("lat")) {
+        latField.value = params.get("lat");
+    }
+
+    if (params.get("lon")) {
+        lonField.value = params.get("lon");
+    }
+
+    // Auto trigger search if parameters exist
+    if (params.toString().length > 0) {
+        setTimeout(() => {
+            document.getElementById("search-btn").click();
+        }, 400);
+    }
+
+});
+</script>
+{% endblock %}

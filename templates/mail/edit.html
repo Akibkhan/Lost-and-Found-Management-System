@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Mail{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<style>
+
+.compose-wrapper{
+    max-width:900px;
+    margin:auto;
+}
+
+.compose-card{
+    border:none;
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.compose-header{
+    background:#f8f9fa;
+    padding:16px 20px;
+    border-bottom:1px solid #e9ecef;
+    font-weight:600;
+    font-size:18px;
+}
+
+.mail-row{
+    display:flex;
+    align-items:center;
+    padding:12px 20px;
+    border-bottom:1px solid #eee;
+}
+
+.mail-label{
+    width:90px;
+    font-weight:600;
+    color:#6c757d;
+}
+
+.mail-field{
+    flex:1;
+}
+
+.recipient-avatar{
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.subject-input{
+    border:none;
+    width:100%;
+    outline:none;
+    font-size:16px;
+}
+
+
+.mail-editor{
+    border:none;
+    resize:none;
+    width:100%;
+    padding:18px;
+    min-height:250px;
+    outline:none;
+}
+
+.compose-footer{
+    padding:14px 20px;
+    border-top:1px solid #eee;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.priority-select{
+    max-width:180px;
+}
+
+</style>
+
+<div class="container mt-4 compose-wrapper">
+
+<div class="card shadow compose-card">
+
+<div class="compose-header">
+<i class="bi bi-pencil-square me-2"></i> Edit Message
+</div>
+
+<form method="POST">
+
+<!-- RECIPIENTS -->
+
+<div class="mail-row">
+
+<div class="mail-label">To</div>
+
+<div class="mail-field">
+
+<div class="row g-2">
+
+{% for user in users %}
+
+<div class="col-md-4">
+
+<div class="form-check">
+
+<input class="form-check-input"
+type="checkbox"
+name="recipients"
+value="{{ user.id }}"
+id="user{{ user.id }}"
+{% if user in mail.recipients %}checked{% endif %}>
+
+<label class="form-check-label" for="user{{ user.id }}">
+
+<img src="{{ url_for('static', filename='profile_pics/' ~ user.profile_picture) }}"
+class="recipient-avatar me-1">
+
+{{ user.first_name }} {{ user.last_name }}
+
+</label>
+
+</div>
+
+</div>
+{% endfor %}
+
+</div>
+
+</div>
+</div>
+
+<!-- SUBJECT -->
+
+<div class="mail-row">
+
+<div class="mail-label">Subject</div>
+
+<div class="mail-field">
+
+<input
+type="text"
+name="subject"
+maxlength="30"
+class="subject-input"
+value="{{ mail.subject }}"
+required>
+
+</div>
+
+</div>
+
+<!-- PRIORITY -->
+
+<div class="mail-row">
+
+<div class="mail-label">Priority</div>
+
+<div class="mail-field">
+
+<select class="form-select priority-select" name="priority">
+
+<option value="low" {% if mail.priority=='low' %}selected{% endif %}>Low</option>
+<option value="normal" {% if mail.priority=='normal' %}selected{% endif %}>Normal</option>
+<option value="high" {% if mail.priority=='high' %}selected{% endif %}>High</option>
+
+</select>
+
+</div>
+
+</div>
+
+<!-- STATUS -->
+
+<div class="mail-row">
+
+<div class="mail-label">Status</div>
+
+<div class="mail-field">
+
+<select class="form-select priority-select" name="status">
+
+<option value="inbox" {% if mail.status=='inbox' %}selected{% endif %}>Inbox</option>
+<option value="archive" {% if mail.status=='archive' %}selected{% endif %}>Archive</option>
+<option value="trash" {% if mail.status=='trash' %}selected{% endif %}>Trash</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<!-- MESSAGE -->
+
+<textarea
+class="mail-editor"
+name="message"
+maxlength="1000"
+required>{{ mail.message }}</textarea>
+
+<!-- FOOTER -->
+
+<div class="compose-footer">
+
+<a href="{{ url_for('mail.view_mail', mail_id=mail.id) }}" class="btn btn-light">
+Cancel
+</a>
+
+<button type="submit" class="btn btn-success px-4">
+
+<i class="bi bi-check-lg"></i>
+Update Mail
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}

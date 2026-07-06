@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-5">
+  <div class="card shadow border-0 rounded-4 mx-auto" style="max-width: 800px; background-color: var(--bs-body-bg);">
+    <div class="card-body p-4 p-md-5 text-center">
+
+      <!-- Profile Picture -->
+      <div class="position-relative d-inline-block mb-3">
+        <img src="{{ url_for('static', filename='profile_pics/' ~ (current_user.profile_picture or 'default.jpg')) }}"
+             alt="Profile Picture"
+             class="rounded-circle border border-3 border-primary-subtle shadow-sm"
+             style="width: 150px; height: 150px; object-fit: cover;">
+        <label for="profile_picture" 
+               class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm"
+               style="cursor: pointer;">
+          <i class="bi bi-camera"></i>
+        </label>
+      </div>
+
+      <h3 class="fw-semibold mb-1">{{ current_user.first_name }} {{ current_user.last_name }}</h3>
+      <p class="text-muted mb-4"><i class="bi bi-envelope me-1"></i>{{ current_user.email or 'unknown' }}</p>
+
+      <hr class="my-4">
+
+      <!-- Profile Details Form -->
+      <form method="POST" enctype="multipart/form-data" action="{{ url_for('profile') }}" id="profileForm">
+        <input type="file" name="profile_picture" id="profile_picture" class="d-none">
+
+        <div class="row g-3 text-start">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">First Name</label>
+            <input type="text" name="first_name" class="form-control rounded-3" 
+                   value="{{ current_user.first_name }}" disabled>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Last Name</label>
+            <input type="text" name="last_name" class="form-control rounded-3" 
+                   value="{{ current_user.last_name }}" disabled>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">City</label>
+            <input type="text" name="city" class="form-control rounded-3" 
+                   value="{{ current_user.city or '' }}" disabled>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Country</label>
+            <input type="text" name="country" class="form-control rounded-3" id="country" 
+                   value="{{ current_user.country or '' }}" disabled>
+<input type="hidden" id="country_code" />
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Street</label>
+            <input type="text" name="street" class="form-control rounded-3" 
+                   value="{{ current_user.street or '' }}" disabled>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">ZIP Code</label>
+            <input type="text" name="zip_code" class="form-control rounded-3" 
+                   value="{{ current_user.zip_code or '' }}" disabled>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center mt-5 gap-3">
+          <button type="button" id="editBtn" class="btn btn-outline-primary px-4">
+            <i class="bi bi-pencil-square me-2"></i>Edit Profile
+          </button>
+          <button type="submit" id="saveBtn" class="btn btn-primary px-4" style="display: none;">
+            <i class="bi bi-check2-circle me-2"></i>Save Changes
+          </button>
+          <button type="button" id="cancelBtn" class="btn btn-secondary px-4" style="display: none;">
+            <i class="bi bi-x-circle me-2"></i>Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 🧠 Edit Mode Script -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const editBtn = document.getElementById('editBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const inputs = document.querySelectorAll('#profileForm input[type="text"], #profileForm input[type="email"]');
+
+  editBtn.addEventListener('click', () => {
+    inputs.forEach(input => input.removeAttribute('disabled'));
+    editBtn.style.display = 'none';
+    saveBtn.style.display = 'inline-block';
+    cancelBtn.style.display = 'inline-block';
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    inputs.forEach(input => input.setAttribute('disabled', 'true'));
+    editBtn.style.display = 'inline-block';
+    saveBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+  });
+});
+</script>
+
+<!-- 💅 Styling -->
+<style>
+.card {
+  transition: all 0.3s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+.dark-mode .card {
+  background-color: #1f1f2e !important;
+  color: #e4e6eb !important;
+}
+.form-control:disabled {
+  background-color: var(--bs-tertiary-bg);
+  cursor: not-allowed;
+}
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13,110,253,0.15);
+}
+</style>
+
+{% endblock %}

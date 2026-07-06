@@ -1,0 +1,23 @@
+Flask>=3.0.0
+Flask-SQLAlchemy>=3.1.1
+SQLAlchemy>=2.0.0
+PyMySQL>=1.1.0
+geopy>=2.4.1
+Werkzeug>=3.0.0
+Flask-Migrate>=4.0.5
+Flask-SocketIO>=5.3.6
+Flask-Caching>=2.1.0
+redis>=5.0.1
+Flask-Login>=0.6.3
+Pillow>=10.0.0
+
+# AI / BLIP
+transformers>=4.40.0
+torch>=2.2.0
+accelerate>=0.30.0
+sentencepiece>=0.2.0
+safetensors>=0.4.2
+
+python-socketio>=5.11.0
+eventlet>=0.35.0
+configparser>=6.0.0

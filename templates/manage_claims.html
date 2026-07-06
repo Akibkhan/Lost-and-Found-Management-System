@@ -1,0 +1,36 @@
+<h3>Pending Claims</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>User</th>
+            <th>Contact</th>
+            <th>Document</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for claim in claims %}
+        <tr>
+            <td>{{ claim.item.name }}</td>
+            <td>{{ claim.user.username }}</td>
+            <td>{{ claim.contact_info }}</td>
+            <td>
+                {% if claim.document_path %}
+                <a href="{{ url_for('static', filename='claim_docs/' + claim.document_path) }}" target="_blank">View</a>
+                {% else %}
+                None
+                {% endif %}
+            </td>
+            <td>
+                {% if current_user.role in ['admin', 'moderator'] %}
+                <a href="{{ url_for('approve_claim', claim_id=claim.id) }}" class="btn btn-success btn-sm">Approve</a>
+                <a href="{{ url_for('reject_claim', claim_id=claim.id) }}" class="btn btn-danger btn-sm">Reject</a>
+                {% else %}
+                No actions available
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

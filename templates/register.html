@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+  
+
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <h2>Create Account</h2>
+        <p class="subtitle">Fill in your details to register</p>
+
+        <form method="POST"
+              enctype="multipart/form-data"
+              action="{{ url_for('register') }}"
+              onsubmit="return handleRegister()">
+
+            <!-- Name Row -->
+            <div class="form-row">
+                <div class="input-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" name="username" required>
+            </div>
+
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" name="email" required>
+            </div>
+
+            <!-- Password -->
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" id="password" required>
+                <span class="toggle-password" onclick="togglePassword()">👁</span>
+            </div>
+
+            <hr class="divider">
+
+            <!-- Address Row -->
+            <div class="form-row">
+                <div class="input-group">
+                    <label>City</label>
+                    <input type="text" name="city">
+                </div>
+
+                <div class="input-group">
+                    <label>Country</label>
+					<input type="text" id="country" name="country"/>
+					<input type="hidden" id="country_code" />
+
+                </div>
+				
+            </div>
+
+            <div class="input-group">
+                <label>Street</label>
+                <input type="text" name="street">
+            </div>
+
+            <div class="input-group">
+                <label>ZIP Code</label>
+                <input type="text" name="zip_code">
+            </div>
+
+            <div class="input-group file-input">
+                <label>Profile Picture</label>
+                <input type="file" name="profile_picture">
+            </div>
+
+            <button type="submit" class="login-btn">
+                <span class="btn-text">Register</span>
+                <span class="loader"></span>
+            </button>
+        </form>
+
+        <p class="register-text">
+            Already have an account?
+            <a href="{{ url_for('login') }}">Login here</a>
+        </p>
+
+    </div>
+</div>
+
+ 
+
+</div>
+<style>
+/* =====================================================
+   BRAND + THEME VARIABLES
+===================================================== */
+:root {
+    --primary: #006ce0;
+    --primary-hover: #0057b8;
+
+    /* Dark mode (default) */
+    --bg: #006ce0;
+    --card-bg: #0b1f3a;
+
+    --text: #ffffff;
+    --input-text: #0655cd;
+    --input-bg: transparent;
+
+    --border: #2c4a73;
+    --divider: #2c4a73;
+}
+
+body.light {
+    /* Light mode */
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+
+    --text: #1f2937;
+    --input-text: #0655cd;
+    --input-bg: #ffffff;
+
+    --border: #d1d9e6;
+    --divider: #e5eaf0;
+}
+
+/* =====================================================
+   BASE
+===================================================== */
+body {
+    margin: 0;
+    background: var(--bg);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* =====================================================
+   THEME TOGGLE
+===================================================== */
+.theme-toggle {
+    position: fixed;
+        top: 13px;
+    right: 13px;
+    z-index: 10;
+}
+
+.theme-toggle input {
+    display: none;
+}
+
+.theme-toggle label {
+    width: 52px;
+    height: 28px;
+    background: #dbeafe;
+    border-radius: 50px;
+    cursor: pointer;
+    position: relative;
+}
+
+.theme-toggle label::after {
+    content: "";
+    width: 22px;
+    height: 22px;
+    background: var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle input:checked + label::after {
+    transform: translateX(24px);
+}
+
+/* =====================================================
+   LAYOUT
+===================================================== */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =====================================================
+   CARD
+===================================================== */
+.login-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 40px;
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.25);
+    animation: fadeUp 0.6s ease;
+}
+
+/* =====================================================
+   HEADINGS
+===================================================== */
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.85;
+    margin-bottom: 32px;
+}
+
+/* =====================================================
+   FORMS
+===================================================== */
+.input-group {
+    position: relative;
+    margin-bottom: 26px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 40px 14px 12px;
+    background: var(--input-bg);
+    border: 1.8px solid var(--border);
+    border-radius: 8px;
+    color: var(--input-text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.25s ease;
+}
+
+/* Focus */
+.input-group input:focus {
+    border-color: var(--primary);
+    color: var(--input-text);
+}
+
+/* Label */
+.input-group label {
+    position: absolute;
+    left: 12px;
+    top: -9px;
+    padding: 0 6px;
+    font-size: 12px;
+    background: var(--card-bg);
+    color: var(--primary);
+}
+
+/* Placeholder */
+.input-group input::placeholder {
+    color: rgba(0, 0, 0, 0.45);
+}
+
+body:not(.light) .input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Password eye */
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--primary);
+}
+
+/* File input */
+.input-group input[type="file"] {
+    padding: 10px;
+    cursor: pointer;
+}
+
+/* =====================================================
+   FORM ROWS
+===================================================== */
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.form-row .input-group {
+    flex: 1;
+}
+
+/* =====================================================
+   DIVIDER
+===================================================== */
+.divider {
+    border: none;
+    height: 1px;
+    background: var(--divider);
+    margin: 28px 0;
+}
+
+/* =====================================================
+   BUTTON
+===================================================== */
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 30px;
+    border: none;
+    background: var(--primary);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.25s ease;
+}
+
+.login-btn:hover {
+    background: var(--primary-hover);
+}
+
+/* Loader */
+.loader {
+    display: none;
+    width: 22px;
+    height: 22px;
+    border: 3px solid #ffffff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin: auto;
+}
+
+.login-btn.loading .btn-text {
+    display: none;
+}
+
+.login-btn.loading .loader {
+    display: block;
+}
+
+/* =====================================================
+   FOOTER TEXT
+===================================================== */
+.register-text {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+}
+
+.register-text a {
+    color: var(--primary);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.register-text a:hover {
+    text-decoration: underline;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+@media (max-width: 600px) {
+    .login-card {
+        padding: 32px 26px;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+/* =====================================================
+   ANIMATIONS
+===================================================== */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+</style>
+<style>.input-group label {
+    position: absolute;
+    left: -13px;
+    top: -23px;
+    padding: 0 6px;
+    font-size: 12px;
+    background: var(--card-bg);
+    color: var(--primary);
+}</style>
+<script>
+function togglePassword() {
+    const pwd = document.getElementById("password");
+    pwd.type = pwd.type === "password" ? "text" : "password";
+}
+
+function showLoader() {
+    document.querySelector(".login-btn").classList.add("loading");
+}
+
+function handleRegister() {
+    const firstName = document.querySelector('input[name="first_name"]').value.trim();
+    const lastName = document.querySelector('input[name="last_name"]').value.trim();
+    const username = document.querySelector('input[name="username"]').value.trim();
+    const email = document.querySelector('input[name="email"]').value.trim();
+    const password = document.getElementById("password").value;
+
+    // First name
+    if (firstName.length < 3) {
+        alert("First name must be at least 3 characters");
+        return false;
+    }
+
+    // Last name
+    if (lastName.length < 4) {
+        alert("Last name must be at least 4 characters");
+        return false;
+    }
+
+    // Username
+    if (username.length < 3) {
+        alert("Username must be at least 3 characters");
+        return false;
+    }
+
+    // Email validation
+    const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+    if (!email.match(emailPattern)) {
+        alert("Please enter a valid email address");
+        return false;
+    }
+
+    // Password
+    if (password.length < 6) {
+        alert("Password must be at least 6 characters");
+        return false;
+    }
+
+    // ✅ If all valid → show loader
+    showLoader();
+    return true;
+}
+</script>
+
+
+
+{% endblock %}

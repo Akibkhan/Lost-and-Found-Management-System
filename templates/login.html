@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+<div class="login-wrapper">
+    <div class="login-card">
+        <h2>Welcome Back 👋</h2>
+        <p class="subtitle">Login to continue</p>
+
+        <form method="POST" action="{{ url_for('login') }}" onsubmit="return handleSubmit()" >
+            <div class="input-group">
+                <input type="text" name="username" required>
+                <label>Username</label>
+            </div>
+
+            <div class="input-group password-group">
+                <input type="password" name="password" id="password" required>
+                <label>Password</label>
+                <span class="toggle-password" onclick="togglePassword()">👁</span>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <span class="btn-text">Login</span>
+                <span class="loader"></span>
+            </button>
+        </form>
+
+        <p class="register-text">
+            Don’t have an account?
+            <a href="{{ url_for('register') }}">Create one</a>
+        </p>
+    </div>
+</div>
+
+
+</div>
+<style>
+
+/* =====================================================
+   THEME VARIABLES
+===================================================== */
+:root {
+    --primary: #006ce0;
+
+    /* Dark mode (default) */
+    --bg: #006ce0;
+    --card-bg: #0b1f3a;
+
+    --text: #ffffff;
+    --input-text: #4d8fe8;;
+    --input-bg: transparent;
+
+    --border: #2c4a73;
+}
+
+body.light {
+    /* Light mode */
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+
+    --text: #1f2937;
+    --input-text: #1f2937;
+    --input-bg: #ffffff;
+
+    --border: #d1d9e6;
+}
+
+/* =====================================================
+   BASE STYLES
+===================================================== */
+body {
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    transition: background 0.35s ease, color 0.35s ease;
+    margin: 0;
+}
+
+/* =====================================================
+   THEME TOGGLE
+===================================================== */
+.theme-toggle {
+    position: fixed;
+    top: 13px;
+    right: 13px;
+    z-index: 10;
+}
+
+.theme-toggle input {
+    display: none;
+}
+
+.theme-toggle label {
+    width: 52px;
+    height: 28px;
+    background: #dbeafe;
+    border-radius: 50px;
+    cursor: pointer;
+    position: relative;
+}
+
+.theme-toggle label::after {
+    content: "";
+    width: 22px;
+    height: 22px;
+    background: var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle input:checked + label::after {
+    transform: translateX(24px);
+}
+
+/* =====================================================
+   LAYOUT
+===================================================== */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =====================================================
+   LOGIN CARD (SOLID)
+===================================================== */
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 38px;
+    border-radius: 14px;
+    background: var(--card-bg);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+    animation: fadeUp 0.6s ease;
+}
+
+/* =====================================================
+   HEADINGS
+===================================================== */
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.85;
+    margin-bottom: 30px;
+}
+
+/* =====================================================
+   INPUTS
+===================================================== */
+.input-group {
+    position: relative;
+    margin-bottom: 26px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 13px 38px 13px 12px;
+    background: var(--input-bg);
+    border: 1.8px solid var(--border);
+    border-radius: 8px;
+    color: var(--input-text);
+    outline: none;
+    transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+/* FIX: force consistent text color on focus */
+.input-group input:focus {
+    border-color: var(--primary);
+    color: var(--input-text);
+}
+
+/* Placeholder */
+.input-group input::placeholder {
+    color: rgba(0, 0, 0, 0.45);
+}
+
+body:not(.light) .input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Floating label (static top) */
+.input-group label {
+    position: absolute;
+    left: 12px;
+    top: -8px;
+    background: var(--card-bg);
+    padding: 0 6px;
+    font-size: 12px;
+    color: var(--primary);
+}
+
+/* Password toggle */
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--primary);
+}
+
+/* =====================================================
+   BUTTON
+===================================================== */
+.login-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 30px;
+    border: none;
+    background: #006ce0;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+.login-btn:hover {
+    background: #0057b8;
+}
+
+.loader {
+    display: none;
+    width: 22px;
+    height: 22px;
+    border: 3px solid #ffffff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin: auto;
+}
+
+.login-btn.loading .btn-text {
+    display: none;
+}
+
+.login-btn.loading .loader {
+    display: block;
+}
+
+/* =====================================================
+   REGISTER TEXT
+===================================================== */
+.register-text {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 14px;
+}
+
+.register-text a {
+    color: var(--primary);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.register-text a:hover {
+    text-decoration: underline;
+}
+
+/* =====================================================
+   ANIMATIONS
+===================================================== */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+<script>
+function togglePassword() {
+    const pwd = document.getElementById("password");
+    pwd.type = pwd.type === "password" ? "text" : "password";
+}
+
+ 
+
+</script>
+
+<script>
+function togglePassword() {
+    const pwd = document.getElementById("password");
+    pwd.type = pwd.type === "password" ? "text" : "password";
+}
+
+function showLoader() {
+    const btn = document.querySelector(".login-btn");
+    btn.classList.add("loading");
+}
+
+function handleSubmit() {
+    const username = document.querySelector('input[name="username"]').value.trim();
+    const password = document.getElementById("password").value;
+
+    // Validation
+    if (username.length < 2) {
+        alert("Username must be at least 3 characters long");
+        return false;
+    }
+
+    if (password.length < 6) {
+        alert("Password must be at least 6 characters long");
+        return false;
+    }
+
+    // Only runs if valid
+    showLoader();
+    return true;
+}
+</script>
+{% endblock %}

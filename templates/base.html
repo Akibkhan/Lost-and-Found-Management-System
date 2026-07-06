@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title or "Lost & Found" }}</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="/static/bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/bootstrap-icons-1.13.1/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="/static/css/sidebar.css" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/countrySelect.css">
+<script src="/static/js/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="/static/css/mail.css">
+<script src="/static/js/mail.js"></script>
+
+
+  <style>
+    :root { --radius: 12px; --transition: all 0.3s ease; }
+    body { font-family: 'Inter', sans-serif; transition: var(--transition); }
+
+    /* ---------------- LIGHT MODE ---------------- */
+    body.light-mode { background-color: #f5f7fa; color: #212529; }
+    .navbar.light-mode { background: linear-gradient(90deg, #0056b3, #007bff); }
+    .sidebar.light-mode { background-color: #fff; border-right: 1px solid #e0e0e0; }
+    .sidebar.light-mode a { color: #333; }
+    .sidebar.light-mode a:hover, .sidebar.light-mode a.active { background-color: #007bff; color: #fff; }
+
+    /* ---------------- DARK MODE ---------------- */
+    body.dark-mode { background-color: #121212; color: #e4e6eb; }
+    .navbar.dark-mode { background: linear-gradient(90deg, #0d6efd, #0042a8); }
+    
+    /* ---------------- NAVBAR ---------------- */
+    .navbar-brand { font-weight: 600; font-size: 1.25rem; color: #fff !important; }
+    .nav-link { color: #fff !important; font-weight: 500; transition: var(--transition); }
+    .nav-link:hover { opacity: 0.85; }
+    .btn-back { background: transparent; border: none; color: #fff; font-size: 1.3rem; margin-right: 10px; transition: var(--transition); }
+    .btn-back:hover { transform: translateX(-2px); opacity: 0.8; }
+
+    /* ---------------- SIDEBAR ---------------- */
+
+
+
+/* ===== MAIN SIDEBAR ===== */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 18px 14px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    transition: 0.35s ease;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    z-index: 3000;
+}
+
+/* Header */
+.sidebar-header {
+    padding: 8px 10px;
+    margin-bottom: 18px;
+}
+
+.sidebar-logo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* LINKS */
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: 0.25s ease;
+    position: relative;
+}
+
+/* Icons */
+.menu-item i {
+    font-size: 1.25rem;
+    opacity: 0.9;
+}
+
+/* Hover */
+.menu-item:hover {
+    background: var(--btn-hover);
+    color: var(--accent);
+}
+
+/* Active link */
+.menu-item.active {
+    background: var(--btn-bg);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* Active indicator bar */
+.menu-item.active::before {
+    content: "";
+    width: 4px;
+    height: 100%;
+    background: var(--accent);
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 0 4px 4px 0;
+}
+
+/* COLLAPSED SIDEBAR */
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar.collapsed .menu-item span,
+.sidebar.collapsed .sidebar-logo {
+    display: none;
+}
+
+.sidebar.collapsed .menu-item {
+    justify-content: center;
+}
+
+/* MOBILE OVERLAY */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(2px);
+    display: none;
+    z-index: 2000;
+}
+
+/* Show overlay when sidebar open on mobile */
+.sidebar.show + .sidebar-overlay {
+    display: block;
+}
+
+/* ===== THEME COLOR VARIABLES ===== */
+:root {
+    --sidebar-bg: #ffffff;
+    --text: #1d1d1d;
+    --border: #e5e5e5;
+    --btn-bg: #f4f4f4;
+    --btn-hover: #eeeeee;
+    --accent: #4A6CF7;
+    --shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.dark-mode {
+    --sidebar-bg: #1f1f1f;
+    --text: #f5f5f5;
+    --border: #333;
+    --btn-bg: #282828;
+    --btn-hover: #333;
+    --accent: #6b8dff;
+    --shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* ---------------- CONTENT ---------------- */
+    .content { margin-left: {% if current_user.is_authenticated %}250px{% else %}0{% endif %}; padding: 90px 2rem 40px; transition: margin-left 0.3s ease; }
+    .content > .container-fluid { max-width: 1300px; margin: auto; }
+
+    /* ---------------- THEME TOGGLE ---------------- */
+    .theme-toggle { background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; transition: transform 0.3s ease; }
+    .theme-toggle:hover { transform: rotate(20deg); }
+
+    /* ---------------- RESPONSIVE ---------------- */
+    @media (max-width: 992px) {
+      .sidebar { left: -250px; }
+      .sidebar.active { left: 0; }
+      .content { margin-left: 0; }
+      .sidebar-overlay { display: none; }
+      .sidebar-overlay.active { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; }
+    }
+
+    /* ---------------- TOASTS ---------------- */
+    #toastContainer {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1055;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .toast-custom {
+      min-width: 250px;
+      max-width: 300px;
+      background-color: var(--primary);
+      color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 12px 16px;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateX(120%);
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+    }
+    .toast-custom.show {
+      opacity: 1;
+      transform: translateX(0);
+      animation: bounceIn 0.4s ease;
+    }
+    .toast-custom .timestamp { font-size: 0.75rem; opacity: 0.8; }
+    @keyframes bounceIn {
+      0% { transform: translateX(120%) scale(0.95); opacity: 0; }
+      60% { transform: translateX(-10px) scale(1.02); opacity: 1; }
+      80% { transform: translateX(5px) scale(0.98); }
+      100% { transform: translateX(0) scale(1); }
+    }
+
+    /* ---------------- NOTIFICATION BADGE ---------------- */
+    #notifBadge { transition: transform 0.3s ease; }
+    #notifBadge.pulse {
+      animation: pulse 0.8s ease;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+    }
+
+    /* ---------------- NOTIFICATION DROPDOWN ---------------- */
+    .dropdown-menu .notif-unread {
+      background-color: #f0f8ff;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .dropdown-menu .notif-unread:hover { background-color: #d6eaff; }
+  </style>
+</head>
+
+<body class="light-mode">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg fixed-top shadow-sm light-mode" id="mainNavbar">
+    <div class="container-fluid px-4">
+      <div class="d-flex align-items-center">
+        <button class="btn-back" onclick="history.back()"><i class="bi bi-arrow-left"></i></button>
+        <a class="navbar-brand" href="{{ url_for('dashboard') }}">Lost & Found</a>
+      </div>
+      <button class="navbar-toggler text-white border-0" type="button" id="sidebarToggle"><i class="bi bi-list"></i></button>
+
+      <div class="collapse navbar-collapse justify-content-end me-3" id="navbarNav">
+        <ul class="navbar-nav align-items-center">
+          {% if current_user.is_authenticated %}
+	 
+<li class="nav-item"><!-- Navbar Search Input -->
+<div class="navbar-search-wrapper position-relative">
+    <i class="bi bi-search search-icon"></i>
+
+    <input 
+        class="form-control navbar-search-input" 
+        type="text" 
+        placeholder="Search items..." 
+        id="navbarSearchInput"
+        readonly
+        data-bs-toggle="modal"
+        data-bs-target="#searchModal"
+    >
+</div></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}"><i class="bi bi-person-circle me-1"></i> Profile</a></li>
+       
+ 
+<!-- Modernized Notification Dropdown Structure -->
+<li>
+<!-- dropdown toggle (keep as-is) -->
+<li class="nav-item dropdown">
+  <a class="nav-link position-relative d-flex align-items-center gap-2"
+     href="#" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bell fs-5"></i>
+    <span id="notifBadge"
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+          style="font-size:0.65rem; display:none;">0</span>
+  </a>
+
+  <!-- VALID dropdown markup: only <li> inside <ul> -->
+  <ul class="dropdown-menu notif-dropdown animated-dropdown mt-2" id="notifMenu" aria-labelledby="notifDropdown" >
+    <li class="px-3 py-2 border-bottom">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-bell-fill"></i>
+        <h6 class="m-0">Notifications</h6>
+      </div>
+    </li>
+
+    <!-- container for JS-injected items -->
+    <li class="p-0">
+      <div id="notifItems" class="p-2"></div>
+    </li>
+ 
+
+    <li class="border-top">
+      <div class="notif-footer text-center p-2">
+		 <a href="#" class="btn btn-sm btn-outline-primary w-100 rounded-pill" id="markAllRead">Mark all as read</a><br><br>
+		 <a class="btn btn-sm btn-primary w-100 rounded-pill" href="{{ url_for('all_notifications') }}">View All</a>
+      </div>
+    </li>
+  </ul>
+</li>
+
+</li>
+            </li>
+			
+		<!-- MAIL DROPDOWN -->		
+<li class="nav-item dropdown navmail-wrapper">
+
+ <a class="nav-link d-flex align-items-center position-relative" 
+       href="#" id="mailDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-envelope fs-5"></i>
+        <span id="mailBadge" class="navmail-badge" {% if unread_count == 0 %}style="display:none"{% endif %}>{{ unread_count }}</span>
+    </a>
+
+<ul class="dropdown-menu dropdown-menu-end navmail-dropdown" data-bs-theme="dark">
+
+    <li class="navmail-header">
+        <div class="navmail-title">
+            <i class="bi bi-envelope-fill"></i>
+            Messages
+        </div>
+
+       
+    </li>
+
+    <li class="navmail-list">
+        <div id="mailItems"></div>
+    </li>
+ <li><center><a href="/mail/inbox" class="navmail-viewall btn btn-sm btn-outline-primary   rounded-pill" style="width: 80% !important;">
+            View all
+        </a></center><li>
+</ul>
+
+</li>
+ 
+			
+			
+			
+			
+			
+			
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-1"></i> Logout</a></li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}"><i class="bi bi-box-arrow-in-right me-1"></i> Login</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}"><i class="bi bi-person-plus me-1"></i> Register</a></li>
+          {% endif %}
+          <li class="nav-item">
+            <button id="themeToggle" class="theme-toggle ms-3" title="Toggle Dark Mode">
+              <i class="bi bi-moon-fill" id="themeIcon"></i>
+            </button>
+			
+
+          </li>
+		  <li>		
+		   
+<button id="sidebarToggleBtn" class="toggle-sidebar-btn hamburger" aria-label="Toggle sidebar" aria-expanded="false">
+  <span class="hamburger-box">
+    <span class="hamburger-inner"></span>
+  </span>
+</button>
+
+</li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+{% if current_user.is_authenticated %}
+<div class="sidebar light-mode" id="sidebar">
+
+<button id="sidebarCloseBtn" class="sidebar-close-btn"><i class="bi bi-x-lg"></i></button>
+
+
+  <h6 class="mt-3 text-uppercase fw-bold small">Navigation</h6>
+
+  {% if current_user.role == 'admin' %}
+     <a href="{{ url_for('manage_users') }}" data-tooltip="Manage Users">
+          <i class="bi bi-people"></i><span>Manage Users</span>
+      </a>
+	  
+
+      <a href="{{ url_for('pending_comments') }}" data-tooltip="Manage Comments">
+          <i class="bi bi-chat-square-dots"></i><span>Manage Comments</span>
+      </a>
+   
+	 
+<a href="{{ url_for('categories') }}" data-tooltip="Manage Categories">
+    <i class="bi bi-tags"></i><span>Manage Categories</span>
+</a>
+      <a href="{{ url_for('all_claims') }}" data-tooltip="Manage Claims">
+          <i class="bi bi-shield-check"></i><span>Manage Claims</span>
+      </a>
+	  <a href="{{ url_for('all_notifications') }}" data-tooltip="Notifications">    <i class="bi bi-bell"></i><span>Notifications</span></a>
+	  <a href="{{ url_for('mail.list_mails',folder='inbox')  }}" data-tooltip="Mail">    <i class="bi bi-envelope"></i><span>Mail</span></a>
+ 
+
+  {% elif current_user.role == 'moderator' %}
+  
+       <a href="{{ url_for('manage_users') }}" data-tooltip="Manage Users">
+          <i class="bi bi-people"></i><span>Manage Users</span>
+      </a>
+	  
+
+      <a href="{{ url_for('pending_comments') }}" data-tooltip="Manage Comments">
+          <i class="bi bi-chat-square-dots"></i><span>Manage Comments</span>
+      </a>
+   
+	 
+<a href="{{ url_for('categories') }}" data-tooltip="Manage Categories">
+    <i class="bi bi-tags"></i><span>Manage Categories</span>
+</a>
+      <a href="{{ url_for('all_claims') }}" data-tooltip="Manage Claims">
+          <i class="bi bi-shield-check"></i><span>Manage Claims</span>
+      </a>
+	  <a href="{{ url_for('all_notifications') }}" data-tooltip="Notifications">    <i class="bi bi-bell"></i><span>Notifications</span></a>
+	  <a href="{{ url_for('mail.list_mails',folder='inbox')  }}" data-tooltip="Mail">    <i class="bi bi-envelope"></i><span>Mail</span></a>
+  {% else %}
+      <a href="{{ url_for('add_item') }}" data-tooltip="Add Item">
+          <i class="bi bi-plus-circle"></i><span>Add Lost/Found Item</span>
+      </a>
+      <a href="{{ url_for('profile') }}" data-tooltip="Profile">
+          <i class="bi bi-person"></i><span>My Profile</span>
+      </a>
+	    <a href="{{ url_for('all_notifications') }}" data-tooltip="Notifications">    <i class="bi bi-bell"></i><span>Notifications</span></a>
+	  <a href="{{ url_for('mail.list_mails',folder='inbox')  }}" data-tooltip="Mail">    <i class="bi bi-envelope"></i><span>Mail</span></a>
+	  
+  {% endif %}
+</div>
+
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+
+  
+{% endif %}
+
+ 
+
+  <!-- Main Content -->
+  <main class="content">
+    <div class="container-fluid">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm rounded" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="/static/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+  <!-- SocketIO -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.min.js"></script>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Core elements (may not exist on every page)
+  const body = document.body;
+  const navbar = document.getElementById('mainNavbar');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const sidebarToggle = document.getElementById('sidebarToggle'); // keep if present
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+
+  // Notification UI elements (may be absent on some pages)
+  const notifToggle = document.getElementById('notifDropdown'); // anchor toggle
+  const notifMenu = document.getElementById('notifMenu');       // <ul> dropdown
+  const notifItems = document.getElementById('notifItems');     // injection container
+  const notifBadge = document.getElementById('notifBadge');
+  const markAllBtn = document.getElementById('markAllRead');
+
+  // Toast container (create if missing)
+  let toastContainer = document.getElementById('toastContainer');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toastContainer';
+    document.body.appendChild(toastContainer);
+  }
+
+  // State
+  let notifications = [];
+
+  /* ---------------- THEME ---------------- */
+  function setTheme(mode) {
+    const elements = [body, navbar, sidebar];
+	const notifMenu = document.getElementById('notifMenu');
+if (notifMenu) {
+  notifMenu.setAttribute('data-bs-theme', mode);
+}
+    elements.forEach(el => {
+      if (!el) return;
+      el.classList.remove('light-mode', 'dark-mode');
+      el.classList.add(`${mode}-mode`);
+    });
+	
+    if (!themeIcon) return;
+    themeIcon.className = mode === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+  }
+
+
+
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  setTheme(savedTheme);
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const current = body.classList.contains('dark-mode') ? 'dark' : 'light';
+      const newTheme = current === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+  }
+
+  /* ---------------- SIDEBAR TOGGLE (safe) ---------------- */
+  if (sidebarToggle && sidebar && sidebarOverlay) {
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+    });
+  }
+
+  /* ---------------- TOAST ---------------- */
+  function showToast(notification) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-custom';
+    toast.innerHTML = `<div>${notification.message}</div><div class="timestamp">${notification.timestamp || ''}</div>`;
+    toastContainer.prepend(toast);
+    // allow CSS transition/triggers
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    const sound = document.getElementById('notifSound');
+    if (sound) sound.play().catch(()=>{});
+
+    if (navigator.vibrate) navigator.vibrate([100,50,100]);
+
+    toast.addEventListener('click', () => {
+      if (notification.url) window.location.href = notification.url;
+      toast.classList.remove('show');
+      setTimeout(()=> toast.remove(), 400);
+    });
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(()=> toast.remove(), 450);
+    }, 5000);
+  }
+
+  /* ---------------- NOTIFICATION RENDER ---------------- */
+  function updateBadge(count) {
+    if (!notifBadge) return;
+    notifBadge.textContent = count;
+    notifBadge.style.display = count ? 'inline-block' : 'none';
+    if (count) {
+      notifBadge.classList.add('pulse');
+      setTimeout(()=> notifBadge.classList.remove('pulse'), 800);
+    }
+  }
+
+  function renderNotifications() {
+  if (!notifMenu || !notifItems) return;
+
+  notifItems.innerHTML = '';
+
+  // Sort latest first
+  const sorted = [...notifications].sort((a, b) => {
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  });
+
+  // Take only 5
+  const latestFive = sorted.slice(0, 5);
+
+  // Count ALL unread (not just 5)
+  let unread = notifications.filter(n => !n.read).length;
+
+  latestFive.forEach(n => {
+    const card = document.createElement('div');
+    card.className = 'notif-card' + (n.read ? '' : ' unread');
+
+    card.innerHTML = `
+      <div class="notif-icon"><i class="bi bi-bell"></i></div>
+      <div class="notif-content">
+        <div class="notif-message">${n.message}</div>
+        <div class="notif-time">${n.timestamp || ''}</div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      n.read = true;
+      renderNotifications();
+
+      if (n.id) {
+        fetch('/notifications/read/' + n.id, { method: 'POST' }).catch(()=>{});
+      }
+
+      if (n.url) window.location.href = n.url;
+    });
+
+    notifItems.appendChild(card);
+  });
+
+  updateBadge(unread);
+}
+  /* ---------------- LOAD from server ---------------- */
+  async function loadNotifications() {
+    if (!notifMenu || !notifItems) return;
+    try {
+      const res = await fetch('/notifications');
+      if (!res.ok) return;
+      const data = await res.json();
+      notifications = Array.isArray(data) ? data : [];
+      renderNotifications();
+    } catch (err) {
+      console.warn('Failed to fetch notifications:', err);
+    }
+  }
+
+  if (markAllBtn) {
+    markAllBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await fetch('/notifications/mark_all_read', { method: 'POST' });
+        notifications.forEach(n => n.read = true);
+        renderNotifications();
+      } catch (err) {
+        console.warn('Failed to mark all read', err);
+      }
+    });
+  }
+
+  /* ---------------- Bootstrap Dropdown init (safe) ---------------- */
+  if (notifToggle && notifMenu && typeof bootstrap !== 'undefined') {
+    try {
+      // ensure bootstrap instance so toggle works properly
+      new bootstrap.Dropdown(notifToggle);
+      // optional: close when clicking outside
+      document.addEventListener('click', (ev) => {
+        if (!notifMenu.contains(ev.target) && !notifToggle.contains(ev.target)) {
+          notifMenu.classList.remove('show');
+        }
+      });
+    } catch (err) {
+      console.warn('Bootstrap dropdown init failed', err);
+    }
+
+    // initial load & polling
+    loadNotifications();
+    setInterval(loadNotifications, 15000);
+  } else {
+    // Not on a page with notifications — skip loading
+    console.info('Notification UI not present — skipping notification initialization.');
+  }
+
+  /* ---------------- Socket.IO (single safe handler) ---------------- */
+  if (typeof io !== 'undefined') {
+    try {
+      const socket = io();
+      socket.on('connect', ()=> console.log('Connected to SocketIO server'));
+      socket.on('new_notification', (data) => {
+        const payload = {
+          id: data.id,
+          message: data.message || 'New notification',
+          timestamp: data.timestamp || new Date().toLocaleString(),
+          read: false,
+          url: data.url || null
+        };
+
+        // If notif UI exists, add and render + show toast
+        if (notifMenu && notifItems) {
+          notifications.unshift(payload);
+          renderNotifications();
+          showToast(payload);
+        } else {
+          // UI not present — show toast only
+          showToast(payload);
+        }
+      });
+    } catch (err) {
+      console.warn('SocketIO initialization error', err);
+    }
+  }
+
+  // expose for debug if needed
+  window.__notifDebug = {
+    notifications,
+    loadNotifications,
+    renderNotifications
+  };
+});
+</script>
+
+
+<style>
+.notification-toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: #fff;
+    color: #333;
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+.notification-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+#notification-badge.pulse {
+    animation: pulseBadge 0.8s ease;
+}
+@keyframes pulseBadge {
+    0% { transform: scale(1); background-color: #ff4d4d; }
+    50% { transform: scale(1.3); background-color: #ff7070; }
+    100% { transform: scale(1); background-color: #ff4d4d; }
+}
+</style>
+<style>
+/* =========================================================
+   MODERNIZED NOTIFICATION DROPDOWN 2025
+   Cleaner, premium, more breathable UI
+========================================================= */
+
+:root {
+    --primary: #4361ee;
+    --primary-light: #edf1ff;
+    --primary-hover: #3a56d4;
+    --card-bg: #ffffff;
+    --radius-xl: 26px;
+    --radius-lg: 18px;
+    --radius-md: 14px;
+    --shadow-soft: 0 12px 32px rgba(0,0,0,0.10);
+    --shadow-hover: 0 20px 40px rgba(0,0,0,0.16);
+    --transition: all .28s cubic-bezier(0.4,0,0.2,1);
+}
+
+body.dark-mode {
+    --primary: #6b82ff;
+    --primary-light: rgba(120,140,255,0.15);
+    --primary-hover: #7e96ff;
+    --card-bg: rgba(30,32,50,0.55);
+}
+
+/* ============================
+   MAIN DROPDOWN CONTAINER
+============================ */
+.modern-notif-dropdown {
+    width: 460px;
+    max-height: 92vh; /* increased */
+    height: auto;
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(22px) saturate(160%);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255,255,255,0.35);
+
+    position: fixed;
+    top: 78px;
+    right: 20px;
+    z-index: 9999;
+
+    animation: notifFadeIn .38s ease forwards;
+    transform-origin: top right;
+    box-shadow: var(--shadow-soft);
+}
+
+ 
+
+@keyframes notifFadeIn {
+    from { opacity: 0; transform: translateY(14px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ============================
+   HEADER
+============================ */
+.notif-header {
+    padding: 20px 22px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    background: linear-gradient(to bottom, rgba(255,255,255,0.75), transparent);
+    backdrop-filter: blur(10px);
+}
+
+ 
+/* Bell Icon */
+.notif-bell-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 8px 20px rgba(67,97,238,.25);
+    animation: softFloat 4s ease-in-out infinite;
+}
+
+@keyframes softFloat {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-6px); }
+}
+
+.notif-header h6 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+ 
+
+/* ============================
+   ITEMS SCROLL AREA
+============================ */
+#notifItems {
+    padding: 14px 10px 20px;
+    overflow-y: auto;
+    flex: 1;
+  /* ensures 5 cards fit before scroll appears */
+    max-height: 420px;    /* <-- PERFECT height for 5 cards */
+    scrollbar-width: auto;            /* FIXED */
+    scrollbar-color: rgba(130,130,130,.6) transparent;
+}#notifItems::-webkit-scrollbar {
+    width: 10px;     /* bigger and visible */
+}
+
+#notifItems::-webkit-scrollbar-track {
+    background: rgba(150,150,150,0.10);
+    border-radius: 20px;
+}
+
+#notifItems::-webkit-scrollbar-thumb {
+    background: rgba(120,120,120,0.55);   /* much more visible */
+    border-radius: 20px;
+}
+
+#notifItems::-webkit-scrollbar-thumb:hover {
+    background: rgba(80,80,80,0.75);
+}
+
+ 
+
+ 
+.modern-notif-dropdown {
+    overflow: hidden; /* REMOVE THIS */
+    overflow: visible; /* NEW */
+}
+
+ 
+
+
+/* ============================
+   NOTIFICATION CARD
+============================ */
+.notif-card {
+    display: flex;
+    gap: 14px;
+    padding: 18px;
+    margin: 0 14px 14px;
+
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 4px 10px rgba(0,0,0,.06);
+
+    cursor: pointer;
+    transition: var(--transition);
+    opacity: 0;
+    transform: translateY(10px);
+    animation: notifSlideIn .36s ease forwards;
+}
+
+@keyframes notifSlideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Entry delays (nice cascade effect) */
+.notif-card:nth-child(1) { animation-delay: .05s; }
+.notif-card:nth-child(2) { animation-delay: .1s; }
+.notif-card:nth-child(3) { animation-delay: .15s; }
+.notif-card:nth-child(4) { animation-delay: .2s; }
+
+.notif-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* Modern unread highlight */
+.notif-card.unread {
+    border-left: 4px solid var(--primary);
+    background: linear-gradient(to right, rgba(67,97,238,0.065), transparent);
+}
+
+ 
+
+/* Notification icon bubble */
+.notif-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+
+    background: #0094d0;
+    color: #ffffff;
+    font-size: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 4px 12px rgba(67,97,238,0.20);
+}
+
+/* Text */
+.notif-content { flex: 1; }
+
+.notif-message {
+    font-size: .96rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text);
+    line-height: 1.4;
+}
+ 
+.notif-time {
+    font-size: .82rem;
+    color: var(--text);
+}
+ 
+
+/* ============================
+   FOOTER BUTTON
+============================ */
+.notif-footer {
+    padding: 14px 22px;
+    flex-shrink: 0;
+
+    background: rgba(248,250,255,0.85);
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+ 
+
+ 
+
+/* ============================
+   MOBILE RESPONSIVE
+============================ */
+@media (max-width: 480px) {
+    .modern-notif-dropdown {
+        width: calc(100vw - 24px);
+        left: 12px;
+        right: 12px;
+    }
+}
+ul#notifMenu {
+    position: absolute;
+    left: -584%;
+}
+  </style>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('sidebarToggleBtn');
+  
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+
+  if (!toggleBtn) return console.warn('Toggle button #sidebarToggleBtn missing.');
+
+  // Helper: open sidebar
+  function openSidebar() {
+    sidebar.classList.add('mobile-open');
+    sidebarOverlay.classList.add('show');
+    toggleBtn.classList.add('is-open');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  // Helper: close sidebar
+  function closeSidebar() {
+    sidebar.classList.remove('mobile-open');
+    sidebarOverlay.classList.remove('show');
+    toggleBtn.classList.remove('is-open');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  // Unified toggle behaviour: if sidebar is visible -> close; else open
+  function handleToggle() {
+    if (!sidebar) return;
+    const isOpen = sidebar.classList.contains('mobile-open') || sidebar.classList.contains('sidebar-open') || sidebarOverlay.classList.contains('show');
+    if (isOpen) closeSidebar();
+    else openSidebar();
+  }
+
+  // Ripple effect: create & remove element
+  function createRipple(e) {
+    const rect = toggleBtn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'toggle-ripple';
+
+    // calculate size & position - ensure cover full button
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    const x = e.clientX - rect.left - size/2;
+    const y = e.clientY - rect.top - size/2;
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+
+    toggleBtn.appendChild(ripple);
+    // remove after animation
+    setTimeout(() => { ripple.remove(); }, 700);
+  }
+
+  // Attach click: ripple + open/close
+  toggleBtn.addEventListener('click', (e) => {
+    createRipple(e);
+    // small delay so ripple is visible before action (optional)
+    setTimeout(handleToggle, 60);
+  });
+
+  // Support close button
+  if (sidebarCloseBtn) {
+    sidebarCloseBtn.addEventListener('click', closeSidebar);
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', closeSidebar);
+  }
+
+  // Keep accessibility in sync if you open/close externally
+  // Observe sidebar class changes and update button state
+  const observer = new MutationObserver(() => {
+    const open = sidebar.classList.contains('mobile-open') || sidebarOverlay.classList.contains('show');
+    toggleBtn.classList.toggle('is-open', open);
+    toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  if (sidebar) observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+
+});
+</script>
+
+
+<!-- Search Modal -->
+<div class="modal fade" id="searchModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content rounded-4">
+
+      <div class="modal-header">
+        <h4 class="modal-title">Search Items</h4>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- SEARCH FORM -->
+        <form id="searchForm">
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label>Search Query</label>
+              <input type="text" class="form-control" id="modalSearchQuery" placeholder="Enter keywords...">
+            </div>
+
+            <div class="col-md-4">
+              <label>Category</label>
+              <select id="modalSearchCategory" class="form-select">
+                <option value="">All</option>
+                {% for cat in categories %}
+                  <option value="{{ cat.name }}">{{ cat.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-primary w-100" type="submit">
+                <i class="bi bi-search"></i> Search
+              </button>
+            </div>
+          </div>
+
+          <!-- ADVANCED SEARCH -->
+        <button 
+    type="button" 
+    id="openAdvancedSearch" 
+    class="btn btn-outline-secondary w-100 mt-3">
+    Advanced Search
+</button>
+
+        </form>
+
+        <hr class="my-4">
+
+        <!-- AJAX Search Results -->
+        <div id="modalSearchResults"></div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+ 
+
+<script>
+document.getElementById("navbarSearchInput").addEventListener("click", function () {
+    document.getElementById("modalSearchQuery").focus();
+});
+</script>
+ 
+<script>
+
+document.getElementById("searchForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const query = document.getElementById("modalSearchQuery").value.trim();
+    const category = document.getElementById("modalSearchCategory").value;
+
+    runAjaxSearch(query, category);
+});
+
+document.getElementById("openAdvancedSearch").addEventListener("click", function(e) {
+    e.preventDefault();
+
+    const query = document.getElementById("modalSearchQuery").value.trim();
+    const category = document.getElementById("modalSearchCategory").value;
+
+    runAjaxSearch(query, category);
+});
+
+
+function runAjaxSearch(query, category) {
+    fetch(`/search?query=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=1`)
+        .then(res => res.json())
+        .then(data => {
+            renderResults(data.items);
+        })
+        .catch(err => console.error("Search Error:", err));
+}
+
+
+function renderResults(items) {
+    const box = document.getElementById("modalSearchResults");
+    box.innerHTML = "";
+
+    if (!items.length) {
+        box.innerHTML = `<p class="text-muted fs-5">No items found.</p>`;
+        return;
+    }
+
+    items.forEach(item => {
+        box.innerHTML += `
+            <div class="card mb-3 shadow-sm p-3">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <img src="${item.photo || '/static/default.png'}"
+                             class="img-fluid rounded"
+                             style="height: 150px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-9">
+                        <h5>${item.name}</h5>
+                        <p>${item.description}</p>
+                        <span class="badge bg-primary">${item.category || 'No Category'}</span>
+                        
+                        ${item.distance ? 
+                            `<span class="badge bg-secondary ms-2">${item.distance.toFixed(1)} km away</span>` 
+                            : ''}
+
+                        <div class="mt-2">
+                            <a href="/item/${item.id}" class="btn btn-outline-primary btn-sm">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+}
+
+</script>
+
+
+  <script>
+document.getElementById("openAdvancedSearch").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    const query = document.getElementById("modalSearchQuery").value.trim();
+    const category = document.getElementById("modalSearchCategory").value.trim();
+
+    let url = "/search/page?";
+    const params = [];
+
+    if (query) params.push("query=" + encodeURIComponent(query));
+    if (category) params.push("category=" + encodeURIComponent(category));
+
+    params.push("radius=5");
+    params.push("page=1");
+
+    // NEW → trigger auto-search on next page
+    params.push("auto=1");
+
+    url += params.join("&");
+
+    window.location.href = url;
+});
+
+
+
+</script>
+<style>/* --- Wrapper ensures icon alignment --- */
+.navbar-search-wrapper {
+    position: relative;
+    width: 260px;
+    transition: all 0.3s ease;
+}
+
+/* --- Search Icon --- */
+.navbar-search-wrapper .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #6c757d;
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+/* --- Main Search Input Styling --- */
+.navbar-search-input {
+    padding-left: 42px;
+    padding-right: 15px;
+    height: 42px;
+
+    border-radius: 50px;
+    border: 1px solid #dcdcdc;
+    
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    font-size: 14px;
+    transition: 
+        box-shadow 0.3s ease,
+        border-color 0.3s ease,
+        background-color 0.3s ease,
+        transform 0.2s ease;
+    cursor: pointer;
+}
+
+/* --- Hover effect --- */
+.navbar-search-input:hover {
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    border-color: #b7b7b7;
+}
+
+/* --- Focus (when clicked opens modal) --- */
+.navbar-search-input:focus {
+    background-color: #fff;
+    border-color: #4e73df;
+    box-shadow: 0 0 0 4px rgba(78,115,223,0.15);
+    outline: none;
+}
+
+/* --- Pulse effect on opening modal --- */
+.navbar-search-input:active {
+    transform: scale(0.97);
+}
+
+/* --- Hover color change for icon --- */
+.navbar-search-wrapper:hover .search-icon {
+    color: #4e73df;
+}
+
+/* --- Responsive support --- */
+@media (max-width: 768px) {
+    .navbar-search-wrapper {
+        width: 100%;
+    }
+}
+</style>
+
+  <!-- Toast Container & Sound -->
+  <audio id="notifSound" src="{{ url_for('static', filename='sounds/notification.mp3') }}" preload="auto"></audio>
+  <div id="toastContainer"></div>
+
+<script src="/static/js/countrySelect.min.js"></script>
+<script>
+  $("#country").countrySelect();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Leaflet CSS/JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+
+<div class="container-fluid px-3 px-md-5">
+  <div class="card shadow-sm border-0 rounded-4 mt-4 mb-5"
+       style="max-width: 700px; margin: auto; background-color: var(--bs-body-bg);">
+    
+    <div class="card-body p-4 p-md-5">
+      <h3 class="text-center mb-4 fw-semibold">
+        <i class="bi bi-pencil-square me-2 text-warning"></i> 
+        Edit Item
+      </h3>
+
+      <form method="POST" enctype="multipart/form-data"
+            action="{{ url_for('edit_item', item_id=item.id) }}">
+
+        <!-- Item Name -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Item Name</label>
+          <input type="text" name="name" class="form-control"
+                 value="{{ item.name }}" required>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            Description
+            <small class="text-muted">(Manual or AI-generated)</small>
+          </label>
+
+          <textarea id="description"
+                    name="description"
+                    class="form-control"
+                    rows="4"
+                    required>{{ item.description }}</textarea>
+
+          <!-- AI Toggle -->
+          <div class="form-check form-switch mt-2">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="aiToggle">
+            <label class="form-check-label fw-semibold" for="aiToggle">
+              🤖 Regenerate description using AI
+            </label>
+          </div>
+        </div>
+
+        <!-- Upload Photo -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Upload New Photo</label>
+          <input type="file" name="photo" class="form-control" accept="image/*">
+
+          {% if item.photo %}
+          <div class="mt-2">
+            <small class="text-muted">Current Photo:</small><br>
+            <img src="{{ url_for('static', filename='uploads/' + item.photo) }}"
+                 class="img-fluid rounded shadow-sm"
+                 style="max-height:150px;">
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Location Search -->
+        <div class="mb-3 position-relative">
+          <label class="form-label fw-semibold">Location</label>
+          <input type="text" id="location" name="location"
+                 class="form-control"
+                 value="{{ item.location }}"
+                 autocomplete="off">
+          <ul id="suggestions"
+              class="list-group position-absolute w-100 shadow-sm"
+              style="z-index: 2000; display: none; max-height: 200px; overflow-y: auto;">
+          </ul>
+        </div>
+
+        <!-- Map -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Select Location on Map</label>
+          <div id="map"
+               style="height: 350px; border: 1px solid #ccc; border-radius: 12px;">
+          </div>
+        </div>
+
+        <!-- Lat/Lng -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Latitude</label>
+            <input type="text" id="latitude" name="latitude"
+                   class="form-control"
+                   value="{{ item.latitude }}"
+                   readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Longitude</label>
+            <input type="text" id="longitude" name="longitude"
+                   class="form-control"
+                   value="{{ item.longitude }}"
+                   readonly>
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Category</label>
+          <select name="category_id" class="form-select" required>
+            <option value="">-- Select Category --</option>
+            {% for category in categories %}
+              <option value="{{ category.id }}"
+                {% if category.id == item.category_id %}selected{% endif %}>
+                {{ category.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Item Status</label>
+          <select name="status" class="form-select" required>
+            <option value="lost"
+              {% if item.status == 'lost' %}selected{% endif %}>
+              Lost
+            </option>
+            <option value="found"
+              {% if item.status == 'found' %}selected{% endif %}>
+              Found
+            </option>
+          </select>
+        </div>
+
+        <!-- Date -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Date</label>
+          <input type="date"
+                 name="date_reported"
+                 class="form-control"
+                 value="{{ item.date_reported }}">
+        </div>
+
+        <button type="submit" class="btn btn-warning w-100 fw-semibold">
+          Update Item
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MAP + AUTOCOMPLETE JS -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    var lat = {{ item.latitude if item.latitude else 26.9124 }};
+    var lng = {{ item.longitude if item.longitude else 75.7873 }};
+
+    var map = L.map('map').setView([lat, lng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        maxZoom: 20
+    }).addTo(map);
+
+    var marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+
+    marker.on("dragend", function () {
+        const pos = marker.getLatLng();
+        document.getElementById("latitude").value = pos.lat;
+        document.getElementById("longitude").value = pos.lng;
+    });
+
+    map.on("click", function (e) {
+        marker.setLatLng(e.latlng);
+        document.getElementById("latitude").value = e.latlng.lat;
+        document.getElementById("longitude").value = e.latlng.lng;
+    });
+
+    setTimeout(() => map.invalidateSize(true), 800);
+
+    // Autocomplete
+    const searchBox = document.getElementById("location");
+    const suggestions = document.getElementById("suggestions");
+
+    searchBox.addEventListener("input", function () {
+        let q = this.value.trim();
+        if (q.length < 3) {
+            suggestions.style.display = "none";
+            return;
+        }
+
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}`)
+            .then(res => res.json())
+            .then(results => {
+                suggestions.innerHTML = "";
+                results.forEach(item => {
+                    let li = document.createElement("li");
+                    li.className = "list-group-item";
+                    li.textContent = item.display_name;
+
+                    li.onclick = () => {
+                        searchBox.value = item.display_name;
+                        marker.setLatLng([item.lat, item.lon]);
+                        map.setView([item.lat, item.lon], 16);
+
+                        document.getElementById("latitude").value = item.lat;
+                        document.getElementById("longitude").value = item.lon;
+
+                        suggestions.style.display = "none";
+                    };
+
+                    suggestions.appendChild(li);
+                });
+
+                suggestions.style.display = "block";
+            });
+    });
+});
+</script>
+
+<!-- AI Description Generator -->
+<script>
+document.getElementById("aiToggle").addEventListener("change", async function () {
+    const descBox = document.getElementById("description");
+    const photoInput = document.querySelector('input[name="photo"]');
+    const categorySelect = document.querySelector('select[name="category_id"]');
+
+    if (!this.checked) return;
+
+    if (!photoInput.files.length) {
+        alert("Please upload a new image to regenerate description.");
+        this.checked = false;
+        return;
+    }
+
+    descBox.value = "🤖 Generating description & category...";
+
+    const formData = new FormData();
+    formData.append("photo", photoInput.files[0]);
+
+    const response = await fetch("/generate-description", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.description) {
+        descBox.value = data.description;
+    }
+
+    if (data.category) {
+        for (let option of categorySelect.options) {
+            if (option.text.trim().toLowerCase() === data.category.toLowerCase()) {
+                categorySelect.value = option.value;
+                break;
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}

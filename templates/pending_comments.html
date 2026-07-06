@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Pending Comments for Moderation</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Comment</th>
+            <th>User</th>
+            <th>Item</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for comment in comments %}
+        <tr>
+            <td>{{ comment.content }}</td>
+            <td>{{ comment.user.username }}</td>
+            <td>{{ comment.item.name }}</td>
+            <td>{{ comment.timestamp|format_datetime }}</td>
+            <td>
+                <div class="dropdown">
+    <button class="btn btn-sm btn-light border-0" data-bs-toggle="dropdown">
+        <i class="bi bi-three-dots-vertical"></i>
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+        
+        <li>
+            <a class="dropdown-item text-success d-flex align-items-center gap-2"
+               href="{{ url_for('approve_comment', comment_id=comment.id) }}">
+               <i class="bi bi-check-circle"></i>
+               Approve
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item text-warning d-flex align-items-center gap-2"
+               href="{{ url_for('reject_comment', comment_id=comment.id) }}">
+               <i class="bi bi-x-circle"></i>
+               Reject
+            </a>
+        </li>
+
+        <li>
+            <form method="POST"
+                  action="{{ url_for('delete_comment_moderator', comment_id=comment.id) }}">
+                <button class="dropdown-item text-danger d-flex align-items-center gap-2">
+                    <i class="bi bi-trash"></i>
+                    Delete
+                </button>
+            </form>
+        </li>
+
+    </ul>
+</div>
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="5" class="text-center">No pending comments</td></tr>
+    {% endfor %}
+    </tbody>
+</table><style>/* Dark mode table for Bootstrap 5 */
+body[data-bs-theme="dark"] {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+/* Table base */
+body[data-bs-theme="dark"] .table {
+    color: #e0e0e0;
+    background-color: #1e1e1e !important;
+    border-color: #2c2c2c !important;
+}
+
+/* Table header */
+body[data-bs-theme="dark"] .table thead th {
+    color: #f0f0f0;
+    background-color: #1a1a1a !important;
+    border-bottom: 2px solid #2c2c2c !important;
+}
+
+/* Table body rows */
+body[data-bs-theme="dark"] .table tbody tr {
+    border-bottom: 1px solid #2c2c2c !important;
+}
+
+/* Striped rows */
+body[data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #2a2a2a !important;
+}
+
+/* Hover rows */
+body[data-bs-theme="dark"] .table-hover > tbody > tr:hover {
+    background-color: #333333 !important;
+}
+
+/* Buttons inside table */
+body[data-bs-theme="dark"] .table .btn-light {
+    color: #e0e0e0;
+    background-color: #333333 !important;
+    border-color: #555555 !important;
+}
+
+/* Dropdown menu */
+body[data-bs-theme="dark"] .table .dropdown-menu {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #2c2c2c !important;
+}
+
+/* Dropdown items hover */
+body[data-bs-theme="dark"] .table .dropdown-item:hover,
+body[data-bs-theme="dark"] .table .dropdown-item:focus {
+    background-color: #333333 !important;
+    color: #ffffff !important;
+}
+
+/* Colored action links */
+body[data-bs-theme="dark"] .text-success { color: #28a745 !important; }
+body[data-bs-theme="dark"] .text-warning { color: #ffc107 !important; }
+body[data-bs-theme="dark"] .text-danger  { color: #dc3545 !important; }</style>
+{% endblock %}

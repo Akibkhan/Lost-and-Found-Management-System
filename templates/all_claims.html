@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+{% block title %}Manage Claims{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Header / Controls -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <h2 class="fw-bold mb-2"><i class="bi bi-file-earmark-check"></i> Manage Claims</h2>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="🔍 Search claims...">
+      <select id="statusFilter" class="form-select form-select-sm">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <select id="sortSelect" class="form-select form-select-sm">
+        <option value="">Sort by...</option>
+        <option value="date-desc">Newest First</option>
+        <option value="date-asc">Oldest First</option>
+        <option value="name-asc">Item A–Z</option>
+        <option value="name-desc">Item Z–A</option>
+      </select>
+      <button id="toggleViewBtn" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-table"></i> Table View
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== CARD VIEW ===== -->
+  <div id="cardView" class="row g-4">
+    {% for claim in claims %}
+    <div class="col-md-6 col-lg-4 claim-card"
+         data-name="{{ claim.item.name|lower }}"
+         data-user="{{ claim.user.username|lower }}"
+         data-status="{{ claim.status }}"
+         data-date="{{ claim.timestamp.isoformat() if claim.timestamp else '' }}">
+      <div class="card border-0 shadow-sm h-100 rounded-4 hover-card">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-3">
+            <img src="{{ url_for('static', filename='profile_pics/' ~ (claim.user.profile_picture or 'default.jpg')) }}"
+                 alt="User" class="rounded-circle me-3" width="90" height="90">
+            <div>
+              <h6 class="mb-0 fw-semibold">
+  {{ claim.user.first_name ~ ' ' ~ claim.user.last_name }}
+</h6>
+<a href="/user/{{ claim.user.id }}">@{{ claim.user.username or 'unknown' }}</a>
+              <small class="text-muted">{{ claim.user.email }}</small>
+            </div>
+          </div>
+
+          <h5 class="mb-1">{{ claim.item.name }}</h5>
+          <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> {{ claim.item.location or 'No location' }}</p>
+          <p class="small text-secondary mb-3"><strong>Contact:</strong> {{ claim.contact_info }}</p>
+
+          <div class="d-flex justify-content-between align-items-center mt-auto">
+            <span>
+              {% if claim.status == 'pending' %}
+                <span class="badge bg-warning text-dark">Pending</span>
+              {% elif claim.status == 'approved' %}
+                <span class="badge bg-success">Approved</span>
+              {% elif claim.status == 'rejected' %}
+                <span class="badge bg-danger">Rejected</span>
+              {% endif %}
+            </span>
+            <small class="text-muted">
+              {{ claim.timestamp.strftime('%Y-%m-%d %H:%M') if claim.timestamp else 'N/A' }}
+            </small>
+          </div>
+
+          <hr>
+          <div class="d-flex justify-content-between">
+            {% if claim.document_paths %}
+            <button class="btn btn-outline-primary btn-sm view-docs-btn" data-claim-id="{{ claim.id }}">
+              <i class="bi bi-folder2-open"></i> Documents
+            </button>
+            {% else %}
+            <span class="text-muted small">No Docs</span>
+            {% endif %}
+
+            {% if claim.status == 'pending' %}
+            <div class="d-flex gap-2">
+              <a href="{{ url_for('approve_claim', claim_id=claim.id) }}" class="btn btn-success btn-sm">
+                <i class="bi bi-check-circle"></i>
+              </a>
+              <a href="{{ url_for('reject_claim', claim_id=claim.id) }}" class="btn btn-danger btn-sm">
+                <i class="bi bi-x-circle"></i>
+              </a>
+            </div>
+            {% else %}
+            <span class="text-muted small">No Action</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ===== TABLE VIEW ===== -->
+  <div id="tableView" class="table-responsive d-none">
+    <table class="table table-hover align-middle shadow-sm rounded-3 overflow-hidden">
+      <thead class="table-primary text-dark">
+        <tr>
+          <th>ID</th>
+          <th>Item</th>
+          <th>Claimed By</th>
+          <th>Contact</th>
+          <th>Docs</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for claim in claims %}
+        <tr class="claim-row"
+            data-name="{{ claim.item.name|lower }}"
+            data-user="{{ claim.user.username|lower }}"
+            data-status="{{ claim.status }}"
+            data-date="{{ claim.timestamp.isoformat() if claim.timestamp else '' }}">
+          <td>{{ claim.id }}</td>
+          <td>{{ claim.item.name }}</td>
+          <td>{{ claim.user.username }}</td>
+          <td>{{ claim.contact_info }}</td>
+          <td>
+            {% if claim.document_paths %}
+            <button class="btn btn-outline-primary btn-sm view-docs-btn" data-claim-id="{{ claim.id }}">
+              <i class="bi bi-folder2-open"></i> View
+            </button>
+            {% else %}
+            <span class="text-muted small">No Docs</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if claim.status == 'pending' %}
+            <span class="badge bg-warning text-dark">Pending</span>
+            {% elif claim.status == 'approved' %}
+            <span class="badge bg-success">Approved</span>
+            {% elif claim.status == 'rejected' %}
+            <span class="badge bg-danger">Rejected</span>
+            {% endif %}
+          </td>
+          <td>{{ claim.timestamp.strftime('%Y-%m-%d') if claim.timestamp else 'N/A' }}</td>
+          <td>
+            {% if claim.status == 'pending' %}
+            <a href="{{ url_for('approve_claim', claim_id=claim.id) }}" class="btn btn-success btn-sm me-1"><i class="bi bi-check-circle"></i></a>
+            <a href="{{ url_for('reject_claim', claim_id=claim.id) }}" class="btn btn-danger btn-sm"><i class="bi bi-x-circle"></i></a>
+            {% else %}
+            <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== DOCUMENT MODALS (separate from views, to work globally) ===== -->
+{% for claim in claims if claim.document_paths %}
+<div class="modal fade" id="docModal{{ claim.id }}" tabindex="-1" aria-labelledby="docModalLabel{{ claim.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title"><i class="bi bi-folder2-open"></i> Documents for {{ claim.item.name }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body bg-light">
+        <div class="row g-3">
+          {% for doc in claim.document_paths %}
+          {% set ext = doc.split('.')[-1].lower() %}
+          <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-3">
+              {% if ext in ['jpg','jpeg','png','gif'] %}
+              <img src="{{ url_for('static', filename='claim_docs/' ~ doc) }}" class="card-img-top rounded-top-3" alt="{{ doc }}" style="height:150px; object-fit:cover;">
+              {% elif ext == 'pdf' %}
+              <div class="d-flex flex-column align-items-center justify-content-center p-4 text-center" style="height:150px;">
+                <i class="bi bi-file-earmark-pdf text-danger fs-1"></i>
+                <small class="mt-2 text-muted">{{ doc }}</small>
+              </div>
+              {% else %}
+              <div class="d-flex flex-column align-items-center justify-content-center p-4 text-center" style="height:150px;">
+                <i class="bi bi-file-earmark-text text-secondary fs-1"></i>
+                <small class="mt-2 text-muted">{{ doc }}</small>
+              </div>
+              {% endif %}
+              <div class="card-body text-center">
+                <a href="{{ url_for('static', filename='claim_docs/' ~ doc) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                  <i class="bi bi-box-arrow-up-right"></i> View File
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<!-- ===== SCRIPT ===== -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('searchInput');
+  const statusFilter = document.getElementById('statusFilter');
+  const sortSelect = document.getElementById('sortSelect');
+  const toggleViewBtn = document.getElementById('toggleViewBtn');
+  const cardView = document.getElementById('cardView');
+  const tableView = document.getElementById('tableView');
+  let isCardView = true;
+
+  const filterClaims = () => {
+    const search = searchInput.value.toLowerCase();
+    const status = statusFilter.value;
+    const elements = document.querySelectorAll(isCardView ? '.claim-card' : '.claim-row');
+    elements.forEach(el => {
+      const matches = (!status || el.dataset.status === status) &&
+                      (el.dataset.name.includes(search) || el.dataset.user.includes(search));
+      el.classList.toggle('d-none', !matches);
+    });
+  };
+
+  const sortClaims = () => {
+    const sortBy = sortSelect.value;
+    const container = isCardView ? cardView : tableView.querySelector('tbody');
+    const items = [...container.children].filter(el => !el.classList.contains('d-none'));
+    items.sort((a, b) => {
+      const nameA = a.dataset.name, nameB = b.dataset.name;
+      const dateA = new Date(a.dataset.date), dateB = new Date(b.dataset.date);
+      switch (sortBy) {
+        case 'name-asc': return nameA.localeCompare(nameB);
+        case 'name-desc': return nameB.localeCompare(nameA);
+        case 'date-asc': return dateA - dateB;
+        case 'date-desc': return dateB - dateA;
+        default: return 0;
+      }
+    });
+    items.forEach(i => container.appendChild(i));
+  };
+
+  const toggleView = () => {
+    isCardView = !isCardView;
+    cardView.classList.toggle('d-none', !isCardView);
+    tableView.classList.toggle('d-none', isCardView);
+    toggleViewBtn.innerHTML = isCardView
+      ? '<i class="bi bi-table"></i> Table View'
+      : '<i class="bi bi-grid"></i> Card View';
+  };
+
+  document.querySelectorAll('.view-docs-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const claimId = e.currentTarget.dataset.claimId;
+      const modal = new bootstrap.Modal(document.getElementById('docModal' + claimId));
+      modal.show();
+    });
+  });
+
+  // listeners
+  searchInput.addEventListener('input', () => { filterClaims(); sortClaims(); });
+  statusFilter.addEventListener('change', () => { filterClaims(); sortClaims(); });
+  sortSelect.addEventListener('change', sortClaims);
+  toggleViewBtn.addEventListener('click', toggleView);
+});
+</script>
+
+<style>
+.hover-card:hover {
+  transform: translateY(-4px);
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+.modal-content {
+  transition: all 0.2s ease;
+}
+/* ===== DARK MODE ===== */
+body[data-bs-theme="dark"] {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+/* Cards */
+body[data-bs-theme="dark"] .card {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0;
+  border-color: #2c2c2c !important;
+}
+body[data-bs-theme="dark"] .hover-card:hover {
+  box-shadow: 0 8px 18px rgba(255,255,255,0.08);
+}
+
+/* Table */
+body[data-bs-theme="dark"] .table {
+  color: #e0e0e0;
+  background-color: #1e1e1e !important;
+  border-color: #2c2c2c !important;
+}
+body[data-bs-theme="dark"] .table th,
+body[data-bs-theme="dark"] .table td {
+  border-color: #2c2c2c !important;
+}
+body[data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #2a2a2a !important;
+}
+body[data-bs-theme="dark"] .table-hover > tbody > tr:hover {
+  background-color: #333333 !important;
+}
+
+/* Badges */
+body[data-bs-theme="dark"] .badge.bg-warning { color: #000; }
+body[data-bs-theme="dark"] .badge.bg-success { color: #fff; }
+body[data-bs-theme="dark"] .badge.bg-danger  { color: #fff; }
+
+/* Buttons */
+body[data-bs-theme="dark"] .btn-outline-primary {
+  color: #e0e0e0;
+  border-color: #555555;
+}
+body[data-bs-theme="dark"] .btn-outline-primary:hover {
+  background-color: #333333;
+}
+body[data-bs-theme="dark"] .btn-outline-dark {
+  color: #e0e0e0;
+  border-color: #888;
+}
+body[data-bs-theme="dark"] .btn-outline-dark:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+/* Links */
+body[data-bs-theme="dark"] a { color: #61dafb; }
+
+/* Modals */
+body[data-bs-theme="dark"] .modal-content {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border-color: #2c2c2c;
+}
+
+/* Smooth card hover */
+.hover-card { transition: all 0.25s ease; transform: translateY(0); }
+.hover-card:hover { transform: translateY(-4px); }
+</style>
+{% endblock %}

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ code }} - {{ message }}</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #8b5cf6;
+    --error-red: #ef4444;
+    --light-text: #111827;
+    --dark-text: #f3f4f6;
+}
+
+/* ---------- Body & Layout ---------- */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(-45deg, #6366f1, #8b5cf6, #4f46e5, #a78bfa);
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
+    color: var(--light-text);
+}
+
+@keyframes gradientFlow {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+/* ---------- Floating Shapes ---------- */
+.floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.15;
+    animation: float 8s ease-in-out infinite;
+}
+
+.floating-shape.shape1 { width: 120px; height: 120px; background: #8b5cf6; top: 10%; left: 15%; animation-delay: 0s;}
+.floating-shape.shape2 { width: 80px; height: 80px; background: #6366f1; bottom: 15%; right: 20%; animation-delay: 3s;}
+.floating-shape.shape3 { width: 150px; height: 150px; background: #a78bfa; top: 50%; left: 70%; animation-delay: 5s;}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) translateX(0px);}
+    50% { transform: translateY(-20px) translateX(20px);}
+}
+
+/* ---------- Container ---------- */
+.error-container {
+    position: relative;
+    text-align: center;
+    background: rgba(255,255,255,0.95);
+    padding: 3rem 2rem;
+    border-radius: 24px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.12);
+    max-width: 520px;
+    width: 90%;
+    backdrop-filter: blur(10px);
+    animation: fadeUp 0.8s ease-out forwards;
+    z-index: 1;
+}
+
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(40px);}
+    100% { opacity: 1; transform: translateY(0);}
+}
+
+/* ---------- Error Code ---------- */
+.error-code {
+    font-size: 8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ef4444, #f97316, #facc15);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 20px rgba(239,68,68,0.5);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1);}
+    50% { transform: scale(1.08);}
+}
+
+/* ---------- Message & Description ---------- */
+.error-message {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #4f46e5;
+}
+
+.error-description {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* ---------- Button ---------- */
+.home-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 2rem;
+    background: #6366f1;
+    color: #fff;
+    border-radius: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(99,102,241,0.4);
+    transition: all 0.3s ease;
+}
+
+.home-button:hover {
+    background: #8b5cf6;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(139,92,246,0.5);
+}
+
+/* ---------- Dark Mode ---------- */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(-45deg, #111827, #1f2937, #1e3a8a, #4f46e5);
+        color: var(--dark-text);
+    }
+    .error-container {
+        background: rgba(31,41,55,0.85);
+        box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+        color: #f3f4f6;
+    }
+    .error-message { color: #8b5cf6; }
+    .error-description { color: #d1d5db; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 576px) {
+    .error-code { font-size: 5rem; }
+    .error-message { font-size: 1.5rem; }
+    .error-description { font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="floating-shape shape1"></div>
+<div class="floating-shape shape2"></div>
+<div class="floating-shape shape3"></div>
+
+<div class="error-container">
+    <h1 class="error-code">{{ code }}</h1>
+    <h2 class="error-message">{{ message }}</h2>
+    <p class="error-description">
+            {{ description }}
+    </p>
+    <a href="/" class="home-button">
+        <i class="bi bi-house-door-fill"></i> Go Home
+    </a>
+</div>
+
+</body>
+</html>

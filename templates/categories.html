@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% set CATEGORY_KEYWORDS = {
+    "Electronics": ["phone", "mobile", "laptop", "charger", "earphones", "headphones", "tablet", "camera"],
+    "Bags": ["bag", "backpack", "handbag", "purse", "school bag"],
+    "Wallets": ["wallet", "purse", "card holder"],
+    "Keys": ["keys", "keychain"],
+    "Books": ["book", "notebook", "textbook"],
+    "Clothing": ["shirt", "pant", "shoe", "jacket", "sweater", "cap"],
+    "Accessories": ["watch", "belt", "glasses", "sunglasses"],
+    "Bottles": ["bottle", "water bottle", "flask"],
+    "Others": []
+} %}
+
+<div class="container mt-5">
+
+  <!-- Category Select Dropdown -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">
+        <i class="bi bi-list"></i> Select Category
+      </h5>
+
+      <!-- FIXED: added id -->
+      <select class="form-select" id="categoryFilter">
+        <option value="all" selected>All Categories</option>
+
+        {% for category, keywords in CATEGORY_KEYWORDS.items() %}
+        <option value="{{ category }}">
+          {{ category }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>
+      <i class="bi bi-tag"></i> Categories
+    </h3>
+
+    <a href="{{ url_for('add_category') }}" class="btn btn-success">
+      <i class="bi bi-plus"></i> Add New
+    </a>
+  </div>
+
+  <table class="table table-striped table-bordered rounded-3 overflow-hidden shadow-sm">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Keywords</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody id="categoryTable">
+      {% for cat in categories %}
+      <!-- FIXED: added data-category -->
+      <tr data-category="{{ cat.name }}">
+        <td>{{ cat.id }}</td>
+
+        <td>{{ cat.name }}</td>
+
+        <td>{{ cat.description or '—' }}</td>
+
+        <td>
+          {% if CATEGORY_KEYWORDS.get(cat.name) %}
+            {{ CATEGORY_KEYWORDS[cat.name] | join(', ') }}
+          {% else %}
+            —
+          {% endif %}
+        </td>
+
+        <td>
+          <a href="{{ url_for('delete_category', id=cat.id) }}"
+             class="btn btn-sm btn-outline-danger"
+             onclick="return confirm('Are you sure you want to delete this category?');">
+
+             <i class="bi bi-trash"></i> Delete
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+
+<!-- FIXED: JavaScript filter -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const filter = document.getElementById("categoryFilter");
+    const rows = document.querySelectorAll("#categoryTable tr");
+
+    filter.addEventListener("change", function () {
+
+        const selected = this.value;
+
+        rows.forEach(row => {
+
+            const category = row.getAttribute("data-category");
+
+            if (selected === "all" || category === selected) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

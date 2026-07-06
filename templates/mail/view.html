@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}View Mail{% endblock %}
+
+{% block head %}
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Custom Mail CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mail-view.css') }}">
+{% endblock %}
+
+{% block content %}
+{% if recipient and not recipient.is_read %}
+<span class="badge bg-primary">New</span>
+{% endif %}
+<div class="mail-wrapper">
+
+  <div class="mail-container">
+
+    <!-- TOOLBAR -->
+    <div class="mail-toolbar">
+      <a href="{{ url_for('mail.list_mails', folder='inbox') }}" class="toolbar-btn">
+        <i class="bi bi-arrow-left"></i> Back
+      </a>
+
+      <div class="toolbar-group">
+        {% if mail.sender_id == current_user.id or current_user.role == 'admin' %}
+        <a href="{{ url_for('mail.edit_mail', mail_id=mail.id) }}" class="toolbar-btn btn-edit">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+
+        <form action="{{ url_for('mail.delete_mail', mail_id=mail.id) }}" method="POST" style="display:inline;">
+          <button class="toolbar-btn btn-delete">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- SUBJECT -->
+    <div class="mail-subject">{{ mail.subject }}</div>
+
+    <!-- SENDER INFO -->
+    <div class="sender-section">
+      <div class="sender-row">
+        <div class="sender-info">
+          <div class="sender-avatar">{{ mail.sender.username[0]|upper }}</div>
+          <div>
+            <strong>{{ mail.sender.username }}</strong><br>
+            <small>
+              To:
+              {% for user in mail.recipients %}
+                {{ user.username }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </small>
+          </div>
+        </div>
+
+        <span class="mail-badge
+          {% if mail.priority == 'high' %}priority-high
+          {% elif mail.priority == 'normal' %}priority-normal
+          {% else %}priority-low{% endif %}">
+          <i class="bi bi-flag"></i> {{ mail.priority|capitalize }}
+        </span>
+      </div>
+
+      <div class="mail-meta">
+        <i class="bi bi-clock"></i> {{ mail.created.strftime('%d %b %Y, %H:%M') }}
+        &nbsp;&nbsp;
+        <i class="bi bi-check-circle"></i> Status: {{ mail.status|capitalize }}
+      </div>
+    </div>
+
+    <!-- MESSAGE BODY -->
+    <div class="mail-body">{{ mail.message }}</div>
+
+  </div>
+
+</div>
+<style>/* mail-view.css */
+body { background:#f4f6f9; }
+
+.mail-wrapper { max-width:900px; margin:40px auto; }
+
+.mail-container { background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; }
+
+/* TOOLBAR */
+.mail-toolbar {
+  padding:12px 16px;
+  border-bottom:1px solid #e5e7eb;
+  display:flex; justify-content:space-between; align-items:center;
+  background:#fafafa;
+}
+
+.toolbar-group { display:flex; gap:10px; }
+
+.toolbar-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 12px; border-radius:6px; font-size:14px;
+  border:1px solid #e5e7eb; background:#fff; cursor:pointer;
+  transition:all .15s ease;
+}
+
+.toolbar-btn:hover { background:#f3f4f6; }
+
+.btn-edit { color:#0d6efd; }
+.btn-edit:hover { background:#e7f1ff; }
+
+.btn-delete { color:#dc3545; }
+.btn-delete:hover { background:#fdeaea; }
+
+/* SUBJECT */
+.mail-subject { font-size:22px; font-weight:600; padding:20px; border-bottom:1px solid #e5e7eb; }
+
+/* SENDER SECTION */
+.sender-section { padding:18px 20px; border-bottom:1px solid #e5e7eb; }
+
+.sender-row { display:flex; justify-content:space-between; }
+.sender-info { display:flex; gap:12px; }
+
+.sender-avatar {
+  width:40px; height:40px; border-radius:50%;
+  background:#2563eb; color:white;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:600;
+}
+
+.mail-meta { margin-top:6px; font-size:13px; color:#6b7280; }
+
+/* MAIL BODY */
+.mail-body { padding:24px; font-size:15.5px; line-height:1.7; color:#374151; white-space:pre-line; }
+
+/* BADGES */
+.mail-badge { font-size:12px; padding:4px 10px; border-radius:6px; font-weight:500; }
+
+.priority-high { background:#fee2e2; color:#b91c1c; }
+.priority-normal { background:#e0f2fe; color:#0369a1; }
+.priority-low { background:#f3f4f6; color:#374151; }
+
+/* RESPONSIVE */
+@media (max-width:576px){
+  .mail-wrapper { margin:20px 10px; }
+  .mail-subject { font-size:20px; padding:16px; }
+  .mail-body { padding:16px; font-size:15px; }
+  .toolbar-btn { font-size:13px; padding:6px 10px; }
+}</style>
+ 
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h4 class="mb-3">💬 Users</h4>
+  <div class="list-group shadow-sm rounded-4">
+    {% for user in users if user.id != current_user.id %}
+    <a href="{{ url_for('chat', user_id=user.id) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+      <img src="{{ url_for('static', filename='profile_pics/' ~ user.profile_picture) }}" 
+           class="rounded-circle me-3" width="45" height="45">
+      <div>
+        <strong>{{ user.username }}</strong><br>
+        <small id="status-{{ user.id }}" class="text-muted">
+          {% if user.id in online_users %}<span class="text-success">● Online</span>{% else %}<span class="text-secondary">● Offline</span>{% endif %}
+        </small>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+const socket = io.connect(window.location.origin);
+
+// Update online/offline status in real-time
+socket.on('status_update', (data) => {
+    const el = document.getElementById(`status-${data.user_id}`);
+    if(el) el.innerHTML = data.is_online ? '<span class="text-success">● Online</span>' : '<span class="text-secondary">● Offline</span>';
+});
+</script>
+{% endblock %}

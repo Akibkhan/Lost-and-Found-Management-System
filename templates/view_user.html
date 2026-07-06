@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}View User{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<style>
+
+.user-profile-card{
+    border:none;
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.profile-header{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.profile-avatar{
+    width:95px;
+    height:95px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #f1f1f1;
+}
+
+.user-name{
+    font-weight:700;
+}
+
+.user-username{
+    color:#6c757d;
+}
+
+.user-info-box{
+    background:#f8f9fa;
+    padding:15px;
+    border-radius:12px;
+    height:100%;
+}
+
+.info-title{
+    font-size:13px;
+    text-transform:uppercase;
+    color:#6c757d;
+    margin-bottom:6px;
+    font-weight:600;
+}
+
+.info-value{
+    font-size:15px;
+}
+
+.action-buttons .btn{
+    border-radius:10px;
+}
+
+</style>
+
+
+<div class="container py-5">
+
+<div class="card shadow user-profile-card">
+
+<div class="card-body p-4">
+
+<!-- PROFILE HEADER -->
+<div class="profile-header mb-4">
+
+<img src="{{ url_for('static', filename='profile_pics/' ~ user.profile_picture) }}"
+     class="profile-avatar shadow-sm">
+
+<div>
+<h4 class="user-name mb-1">
+{{ user.first_name }} {{ user.last_name }}
+</h4>
+
+<div class="user-username mb-2">
+<i class="bi bi-person"></i> @{{ user.username }}
+</div>
+
+<span class="badge bg-primary text-uppercase px-3 py-2">
+{{ user.role }}
+</span>
+
+</div>
+
+</div>
+
+<hr class="mb-4">
+
+
+<!-- USER DETAILS -->
+<div class="row g-3">
+
+<div class="col-md-6">
+<div class="user-info-box">
+<div class="info-title">
+<i class="bi bi-envelope"></i> Email
+</div>
+<div class="info-value">
+{{ user.email }}
+</div>
+</div>
+</div>
+
+<div class="col-md-6">
+<div class="user-info-box">
+<div class="info-title">
+<i class="bi bi-geo-alt"></i> Address
+</div>
+<div class="info-value">
+{{ user.street or '' }}, {{ user.city or '' }}, {{ user.country or '' }}
+</div>
+</div>
+</div>
+
+</div>
+
+
+<!-- ACTION BUTTONS -->
+<div class="d-flex justify-content-between align-items-center mt-4 action-buttons">
+
+<a href="{{ url_for('manage_users') }}" class="btn btn-outline-secondary">
+<i class="bi bi-arrow-left"></i> Back
+</a>
+
+<div>
+
+<a href="{{ url_for('mail.create_mail', recipient_id=user.id) }}" class="btn btn-outline-primary me-2">
+<i class="bi bi-envelope-paper"></i> Send Mail
+</a>
+
+ 
+
+</div>
+
+</div>
+
+
+</div>
+</div>
+
+</div>
+
+{% endblock %}

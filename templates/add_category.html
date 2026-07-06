@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% set CATEGORY_KEYWORDS = {
+    "Electronics": ["phone", "mobile", "laptop", "charger", "earphones", "headphones", "tablet", "camera"],
+    "Bags": ["bag", "backpack", "handbag", "purse", "school bag"],
+    "Wallets": ["wallet", "purse", "card holder"],
+    "Keys": ["keys", "keychain"],
+    "Books": ["book", "notebook", "textbook"],
+    "Clothing": ["shirt", "pant", "shoe", "jacket", "sweater", "cap"],
+    "Accessories": ["watch", "belt", "glasses", "sunglasses"],
+    "Bottles": ["bottle", "water bottle", "flask"],
+    "Others": []
+} %}
+
+<div class="container mt-5" style="max-width: 600px;">
+  <div class="card shadow-sm rounded-4 p-4">
+
+    <h3 class="text-center mb-4">
+      <i class="bi bi-tags"></i> Add New Category
+    </h3>
+
+    <form method="POST" action="{{ url_for('add_category') }}">
+
+      <!-- Category Select -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Select Category</label>
+
+        <select name="name" class="form-select" required id="categorySelect">
+          <option value="" selected disabled>Choose category</option>
+
+          {% for category in CATEGORY_KEYWORDS.keys() %}
+          <option value="{{ category }}">
+            {{ category }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Description -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Description</label>
+
+        <textarea
+          name="description"
+          class="form-control"
+          rows="3"
+          placeholder="Optional description..."
+        ></textarea>
+      </div>
+
+      <!-- Keywords Preview -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Keywords</label>
+
+        <div id="keywordsBox" class="border rounded-3 p-3 bg-light text-muted">
+          Select a category to view keywords
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-plus-circle"></i> Add Category
+      </button>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  const categoryKeywords = {{ CATEGORY_KEYWORDS | tojson }};
+
+  const categorySelect = document.getElementById("categorySelect");
+  const keywordsBox = document.getElementById("keywordsBox");
+
+  categorySelect.addEventListener("change", function () {
+    const selected = this.value;
+    const keywords = categoryKeywords[selected];
+
+    if (keywords.length > 0) {
+      keywordsBox.innerHTML = keywords
+        .map(k => `<span class="badge bg-primary me-1 mb-1">${k}</span>`)
+        .join("");
+    } else {
+      keywordsBox.innerHTML = `<span class="text-muted">No keywords available</span>`;
+    }
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+
+<style>
+/* ---------- Page Title ---------- */
+.page-title {
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+/* ---------- Large Search Bar ---------- */
+.search-wrapper {
+    max-width: 650px;
+    margin: auto;
+    margin-bottom: 35px;
+    position: relative;
+}
+
+.search-wrapper input#userSearch {
+    height: 55px;
+    border-radius: 14px;
+    font-size: 16px;
+    padding-left: 50px;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+    color: #212529;
+    transition: all 0.3s ease;
+}
+
+/* Placeholder default color */
+.search-wrapper input#userSearch::placeholder {
+    color: #6c757d;
+}
+
+.search-wrapper i {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    color: #6c757d;
+    font-size: 18px;
+}
+
+/* ---------- Table Container ---------- */
+.table-container {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+/* ---------- Modern Table ---------- */
+.modern-table {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    width: 100%;
+}
+
+.modern-table thead th {
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    border: none;
+    color: #495057;
+}
+
+.modern-table tbody tr {
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.modern-table tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.modern-table td {
+    border: none;
+    vertical-align: middle;
+    padding: 14px;
+    color: #212529;
+}
+
+/* ---------- Avatar ---------- */
+.user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* ---------- Role Badges ---------- */
+.role-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin {
+    background: #6f42c1;
+    color: white;
+}
+
+.moderator {
+    background: #f0ad4e;
+    color: #212529;
+}
+
+.user {
+    background: #6c757d;
+    color: white;
+}
+
+/* ---------- Action Buttons ---------- */
+.action-buttons .btn {
+    border-radius: 10px;
+    margin-right: 5px;
+}
+
+/* ================= Dark Mode ================= */
+body.dark-mode {
+    background-color: #121212;
+    color: #e9ecef;
+}
+
+body.dark-mode .search-wrapper input#userSearch {
+    background-color: #1e1e1e;
+    border-color: #495057;
+    color: #e9ecef;
+}
+
+/* Placeholder color in dark mode */
+body.dark-mode .search-wrapper input#userSearch::placeholder {
+    color: #ffffff;
+}
+
+body.dark-mode .search-wrapper i {
+    color: #adb5bd;
+}
+
+/* Table dark mode */
+body.dark-mode .modern-table thead th {
+    color: #ced4da;
+    background-color: #1e1e1e;
+}
+
+body.dark-mode .modern-table tbody tr {
+    background: #1e1e1e;
+    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .modern-table tbody tr:hover {
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .modern-table td {
+    color: #e9ecef;
+}
+
+body.dark-mode .role-badge.moderator {
+    color: #e9ecef;
+}
+
+body.dark-mode .action-buttons .btn {
+    border-color: #495057;
+}
+
+/* Smooth transitions for toggle */
+body,
+.search-wrapper input,
+.modern-table tbody tr,
+.modern-table thead th {
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}/* ---------- Dark Mode Table Override ---------- */
+body.dark-mode .modern-table,
+body.dark-mode .modern-table tbody tr,
+body.dark-mode .modern-table td,
+body.dark-mode .modern-table th {
+    background-color: #1e1e1e !important; /* override Bootstrap table background */
+    color: #e9ecef !important;           /* override Bootstrap table text color */
+    border-color: #343a40 !important;    /* optional: dark border */
+}
+
+body.dark-mode .modern-table tbody tr:hover {
+    background-color: #2a2a2a !important; /* hover row color */
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .modern-table thead th {
+    background-color: #1e1e1e !important;
+    color: #ced4da !important;
+}body.dark-mode .action-buttons .btn {
+    border-color: #ffffff;
+    color: white;
+}
+
+</style>
+
+<div class="container my-5">
+
+<h3 class="text-center page-title">
+<i class="bi bi-people-fill me-2"></i> Manage Users
+</h3>
+
+<!-- Large Search Bar -->
+<div class="search-wrapper position-relative">
+<i class="bi bi-search"></i>
+<input type="text"
+id="userSearch"
+class="form-control shadow-sm"
+placeholder="Search users by username, email, role or location...">
+</div>
+
+
+{% if users %}
+
+<div class="table-responsive table-container">
+
+<table class="table modern-table align-middle">
+
+<thead class="text-muted text-uppercase">
+<tr>
+<th>#</th>
+<th>User</th>
+<th>Email</th>
+<th>Name</th>
+<th>Location</th>
+<th>Role</th>
+<th class="text-center">Actions</th>
+</tr>
+</thead>
+
+<tbody id="userTable">
+
+{% for user in users %}
+
+<tr>
+
+<td class="fw-semibold">{{ loop.index }}</td>
+
+<td>
+<div class="d-flex align-items-center">
+
+<img src="{{ url_for('static', filename='profile_pics/' ~ user.profile_picture) }}"
+class="user-avatar me-3 shadow-sm">
+
+<div>
+<div class="fw-semibold">{{ user.username }}</div>
+<small class="text-muted">@{{ user.username }}</small>
+</div>
+
+</div>
+</td>
+
+<td>{{ user.email }}</td>
+
+<td>
+{{ user.first_name or '' }} {{ user.last_name or '' }}
+</td>
+
+<td>
+{{ user.city or '' }}, {{ user.country or '' }}
+</td>
+
+<td>
+
+{% if user.role == 'admin' %}
+<span class="role-badge admin">Admin</span>
+
+{% elif user.role == 'moderator' %}
+<span class="role-badge moderator">Moderator</span>
+
+{% else %}
+<span class="role-badge user">User</span>
+{% endif %}
+
+</td>
+
+<td class="text-center">
+
+<div class="action-buttons">
+
+<a href="{{ url_for('view_user', user_id=user.id) }}"
+class="btn btn-sm btn-outline-primary">
+<i class="bi bi-eye"></i>
+</a>
+
+<a href="{{ url_for('edit_user', user_id=user.id) }}"
+class="btn btn-sm btn-outline-success">
+<i class="bi bi-pencil"></i>
+</a>
+
+<form action="{{ url_for('delete_user', user_id=user.id) }}"
+method="POST"
+class="d-inline">
+
+<button type="submit"
+class="btn btn-sm btn-outline-danger"
+onclick="return confirm('Delete this user?');">
+
+<i class="bi bi-trash"></i>
+
+</button>
+
+</form>
+
+{% if user.role != 'admin' %}
+
+<div class="btn-group">
+
+<button class="btn btn-sm btn-outline-dark dropdown-toggle"
+data-bs-toggle="dropdown">
+Role
+</button>
+
+<ul class="dropdown-menu">
+
+<li>
+<a class="dropdown-item"
+href="{{ url_for('set_user_role', user_id=user.id, role='user') }}">
+User
+</a>
+</li>
+
+<li>
+<a class="dropdown-item"
+href="{{ url_for('set_user_role', user_id=user.id, role='moderator') }}">
+Moderator
+</a>
+</li>
+
+<li>
+<a class="dropdown-item"
+href="{{ url_for('set_user_role', user_id=user.id, role='admin') }}">
+Admin
+</a>
+</li>
+
+</ul>
+
+</div>
+
+{% endif %}
+
+</div>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info text-center mt-4 shadow-sm rounded">
+<i class="bi bi-info-circle"></i> No users found.
+</div>
+
+{% endif %}
+
+</div>
+
+<script>
+
+document.getElementById("userSearch").addEventListener("input", function() {
+
+const filter = this.value.toLowerCase();
+
+document.querySelectorAll("#userTable tr").forEach(row => {
+
+row.style.display = row.innerText.toLowerCase().includes(filter)
+? ""
+: "none";
+
+});
+
+});
+
+</script>
+
+{% endblock %}

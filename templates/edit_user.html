@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Edit User{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-header bg-primary text-white py-3">
+      <h4 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Edit User</h4>
+    </div>
+    <div class="card-body p-4">
+      <form method="POST" enctype="multipart/form-data">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Username</label>
+            <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Email</label>
+            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">First Name</label>
+            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Last Name</label>
+            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">City</label>
+            <input type="text" name="city" class="form-control" value="{{ user.city }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Country</label>
+            <input type="text" name="country" class="form-control" value="{{ user.country }}"id="country">
+			<input type="hidden" id="country_code" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Street</label>
+            <input type="text" name="street" class="form-control" value="{{ user.street }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">ZIP Code</label>
+            <input type="text" name="zip_code" class="form-control" value="{{ user.zip_code }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Role</label>
+            <select name="role" class="form-select">
+              <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+              <option value="moderator" {% if user.role == 'moderator' %}selected{% endif %}>Moderator</option>
+              <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold text-danger">Change Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Leave blank to keep unchanged">
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label fw-semibold">Profile Picture</label><br>
+            <img src="{{ url_for('static', filename='profile_pics/' ~ user.profile_picture) }}"
+                 alt="Profile Picture"
+                 class="rounded-circle mb-2" width="80" height="80" style="object-fit: cover;">
+            <input type="file" name="profile_picture" class="form-control mt-2">
+          </div>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between">
+          <a href="{{ url_for('manage_users') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+          <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
